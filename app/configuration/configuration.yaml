@@ -1,0 +1,48 @@
+database:
+  name: テストフォーム
+  key: test_form
+  directory: db
+template:
+  directory: html
+  form: form.html
+  thank: thank.html
+  reply_mail: mail.html
+  admin_mail: admin.html
+form:
+  input:
+    - type: text
+      key: full_name
+      validation:
+        - type: required
+        - type: length
+          value: 1..20
+    - type: select_one
+      key: gender
+      value:
+        - female
+        - male
+        - other
+      validation:
+        - type: required
+    - type: select_any
+      key: hobby
+      value:
+        - PC
+        - Programming
+        - Game
+      validation:
+        - type: required
+    - type: email
+      key: mail_address
+      validation:
+        - type: email
+    - type: password
+      key: password
+      validation:
+        - type: confirmation
+        - type: length
+          value: 8..84
+        - type: only
+          value:
+            - string
+            - number
