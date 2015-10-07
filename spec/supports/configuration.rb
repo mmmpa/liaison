@@ -1,3 +1,17 @@
+def invalid_hash
+  valid = valid_hash
+  valid['database'].delete('directory')
+  valid
+end
+
+def invalid_file_hash
+  valid = valid_hash
+  valid['template']['form'] = 'not_exist.html'
+  valid
+end
+
+def valid_hash
+  YAML.load <<-EOS
 database:
   name: テストフォーム
   key: test_form
@@ -14,9 +28,7 @@ form:
       validation:
         - type: required
         - type: length
-          value:
-            min: 1
-            max: 20
+          value: 1..20
     - type: select_one
       key: gender
       value:
@@ -47,3 +59,5 @@ form:
           value:
             - string
             - number
+  EOS
+end

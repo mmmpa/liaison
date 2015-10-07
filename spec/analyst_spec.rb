@@ -42,39 +42,4 @@ describe Analyst do
       end
     end
   end
-
-end
-
-def invalid_hash
-  valid = valid_hash
-  valid['database'].delete('directory')
-  valid
-end
-
-def invalid_file_hash
-  valid = valid_hash
-  valid['template']['form'] = 'not_exist.html'
-  valid
-end
-
-def valid_hash
-  YAML.load <<-EOS
-database:
-  name: テストフォーム
-  key: test_form
-  directory: db
-template:
-  form: html/form.html
-  thank: html/thank.html
-  reply_mail: html/mail.html
-  admin_mail: html/admin.html
-form:
-  input:
-    - type: text
-      key: full_name
-      validation:
-        - type: required
-        - type: length
-          value: 1..20
-  EOS
 end
