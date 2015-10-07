@@ -1,65 +1,46 @@
 require 'active_record'
 
-
-class InquiryTable < ActiveRecord::Migration
-  def up
-    create_table :test_table do |t|
-      t.string :name
-      t.string :label
-      t.text :value
-      t.string :type
-      t.integer :position
-    end
-  end
-
-  def down
-    drop_table :test_table
-  end
-end
-
 class Inquiry < ActiveRecord::Base
-  self.table_name = 'test_table'
-
   class << self
-    def inject(configure)
-      inputs = configure['input']
-      Inquiry.class_eval {
-        parameters = inputs.map do |input|
-          key = input['key'].to_sym
-          validators = {}
-          if (validations = input['validation']).is_a?(Array)
-            validations.map do |validation|
-              case validation['type'].to_sym
-                when :required
-                  validators.merge!({presence: true})
-                when :length
-                  validators.merge!({length: {
-                    minimum: validation['value']['min'] || 0,
-                    maximum: validation['value']['max'] || 1000
-                  }})
-                when :select_one
-                  validators.merge!({inclusion: validation['value']})
-                when :select_any
-                  validators.merge!({inclusion: validation['value']})
-              end
-            end
-          end
-          validates(key, **validators) if validators != {}
+    def ready(configure)
+      ActiveRecord::Base.establish_connection(
+        adapter: 'sqlite3',
+        database: 'db'
+      )
 
-          key
+      table_name = configure.database[:table_name]
+      table_columns = configure.database[:columns]
+
+      ready_table(table_name)
+      ready_column(table_name, table_columns)
+    end
+
+    def ready_table(table_name)
+      unless ActiveRecord::Base.connection.table_exists?(table_name)
+        InquiryTable.create(table_name)
+      end
+
+      self.table_name = table_name
+    end
+
+    def ready_column(table_name, table_columns)
+      self.columns.each do |column_information|
+        table_columns.delete(column_information.name)
+      end
+
+      InquiryTable.change(table_name, table_columns) if table_columns != {}
+    end
+
+    def inject(configure)
+      Inquiry.class_eval do
+        configure.parameters.each do |name|
+          if (validator = configure.validators[name]) != {}
+            validates(name, **validator)
+          end
         end
-        p parameters
-        attr_accessor *parameters.flatten
-      }
+        attr_accessor *configure.parameters
+      end
     end
   end
 end
 
-ActiveRecord::Base.establish_connection(
-  adapter: 'sqlite3',
-  database: 'db'
-)
-begin
-  InquiryTable.migrate(:up)
-rescue
-end

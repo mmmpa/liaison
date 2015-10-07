@@ -1,3 +1,16 @@
+require 'securerandom'
+
+def valid_params
+  {
+    full_name: 'full_name',
+    gender: 'male',
+    hobby: 'Programming',
+    mail_address: 'mmmpa.mmmpa@gmail.com',
+    password: 'a' * 8,
+    password_confirmation: 'a' * 8
+  }
+end
+
 def invalid_hash
   valid = valid_hash
   valid['database'].delete('directory')
@@ -14,7 +27,7 @@ def valid_hash
   YAML.load <<-EOS
 database:
   name: テストフォーム
-  key: test_form
+  key: #{SecureRandom.hex(4)}
   directory: db
 template:
   form: html/form.html
@@ -28,28 +41,32 @@ form:
       validation:
         - type: required
         - type: length
-          value: 1..20
-    - type: select_one
+          value:
+            min: 1
+            max: 20
+    - type: text
       key: gender
-      value:
-        - female
-        - male
-        - other
       validation:
         - type: required
-    - type: select_any
+        - type: select_one
+          value:
+            - female
+            - male
+            - other
+    - type: text
       key: hobby
-      value:
-        - PC
-        - Programming
-        - Game
       validation:
         - type: required
-    - type: email
+        - type: select_any
+          value:
+            - PC
+            - Programming
+            - Game
+    - type: text
       key: mail_address
       validation:
         - type: email
-    - type: password
+    - type: text
       key: password
       validation:
         - type: confirmation

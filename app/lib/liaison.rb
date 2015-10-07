@@ -9,12 +9,17 @@ class Liaison
     end
   end
 
-  def initialize(input)
-    @method = :get
-    @params = {}
+  def initialize(configuration, input)
+    @configuration = configuration
+    @method = input[:method]
+    @parameters = pick_required(input[:parameters])
 
     detect_state!
     lead!
+  end
+
+  def pick_required(params)
+    params.slice(*@configuration.parameters)
   end
 
   def detect_state!
@@ -25,7 +30,7 @@ class Liaison
     end
 
     #入力内容の検査
-    @inquiry = Inquiry.new(@params)
+    @inquiry = Inquiry.new(@parameters)
     unless @inquiry.valid?
       self.state = :not_validated
       return
@@ -65,8 +70,9 @@ class Liaison
         #確認画面表示
       when :complete
         #データベースに登録
-        #終了画面表示
-        #メールを送信
+        @inquiry.save!
+      #終了画面表示
+      #メールを送信
       else
         nil
     end

@@ -17,27 +17,29 @@ form:
           value:
             min: 1
             max: 20
-    - type: select_one
+    - type: text
       key: gender
-      value:
-        - female
-        - male
-        - other
       validation:
         - type: required
-    - type: select_any
+        - type: select_one
+          value:
+            - female
+            - male
+            - other
+    - type: text
       key: hobby
-      value:
-        - PC
-        - Programming
-        - Game
       validation:
         - type: required
-    - type: email
+        - type: select_any
+          value:
+            - PC
+            - Programming
+            - Game
+    - type: text
       key: mail_address
       validation:
         - type: email
-    - type: password
+    - type: text
       key: password
       validation:
         - type: confirmation

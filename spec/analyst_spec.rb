@@ -15,10 +15,10 @@ describe Analyst do
       end
     end
 
-    context 'when get result' do
+    context 'when get configuration' do
       context 'before analysing' do
         it do
-          expect { Analyst.new('spec/fixtures', valid_hash).result }.to raise_error(Analyst::NotYetAnalysed)
+          expect { Analyst.new('spec/fixtures', valid_hash).configuration }.to raise_error(Analyst::NotYetAnalysed)
         end
       end
 
