@@ -3,6 +3,8 @@ require 'active_record'
 class Inquiry < ActiveRecord::Base
   class << self
     def ready(configure)
+      return if @initialized
+
       ActiveRecord::Base.establish_connection(
         adapter: 'sqlite3',
         database: 'db'
@@ -32,14 +34,18 @@ class Inquiry < ActiveRecord::Base
     end
 
     def inject(configure)
+      return if @initialized
+
       Inquiry.class_eval do
         configure.parameters.each do |name|
-          if (validator = configure.validators[name]) != {}
+          if (validator = configure.validators[name]) && validator != {}
             validates(name, **validator)
           end
         end
         attr_accessor *configure.parameters
       end
+
+      @initialized = true
     end
   end
 end

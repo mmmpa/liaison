@@ -27,7 +27,7 @@ def valid_hash
   YAML.load <<-EOS
 database:
   name: テストフォーム
-  key: #{SecureRandom.hex(4)}
+  key: aaaa
   directory: db
 template:
   form: html/form.html
@@ -40,41 +40,52 @@ form:
       key: full_name
       validation:
         - type: required
+          message: 姓名を入力してください
         - type: length
           value:
-            min: 1
+            min: 2
             max: 20
+          message: 2～20文字で入力してください
     - type: text
       key: gender
       validation:
         - type: required
+          message: いずれかを選択してください
         - type: select_one
           value:
             - female
             - male
             - other
+          message: 正しくない入力が含まれています
     - type: text
       key: hobby
       validation:
         - type: required
+          message: 趣味を一つ以上選択してください
         - type: select_any
           value:
             - PC
             - Programming
             - Game
+          message: 正しくない入力が含まれています
     - type: text
       key: mail_address
       validation:
         - type: email
+          message: メールアドレスの書式が正しくありません
+        - type: confirmation
+          message: メールアドレスが一致しません
     - type: text
       key: password
       validation:
         - type: confirmation
         - type: length
-          value: 8..84
+          value: 8..64
+          message: 8～64文字で入力してください
         - type: only
           value:
             - string
             - number
+          message: 英数字のみ入力可能です
   EOS
 end

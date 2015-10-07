@@ -1,9 +1,14 @@
 require 'rspec'
 require './spec/helper'
-require 'yaml'
-require 'pp'
 
 describe Inquiry do
+  let(:config) { Analyst.new('spec/fixtures', valid_hash).analyse.configuration }
+
+  before :each do
+    Inquiry.ready(config)
+    Inquiry.inject(config)
+  end
+
   context 'with database' do
     it do
       Inquiry.new
@@ -11,13 +16,6 @@ describe Inquiry do
   end
 
   describe 'dynamic validator injection' do
-    let(:config) { Analyst.new('spec/fixtures', valid_hash).analyse.configuration }
-
-    before :each do
-      Inquiry.ready(config)
-      Inquiry.inject(config)
-    end
-
     context 'with invalid params' do
       context 'when validate' do
         it do
@@ -27,7 +25,96 @@ describe Inquiry do
 
       context 'when save' do
         it do
-          expect{Inquiry.new.save!}.to raise_error(ActiveRecord::RecordInvalid)
+          expect { Inquiry.new.save! }.to raise_error(ActiveRecord::RecordInvalid)
+        end
+      end
+
+      describe 'validator' do
+        let(:model) { Inquiry.new }
+
+        context 'with confirmation' do
+          it do
+            model.mail_address = 'a@a.com'
+            model.mail_address_confirmation = 'a2@a.com'
+            model.valid?
+            expect(model.errors[:mail_address_confirmation]).to include('メールアドレスが一致しません')
+          end
+        end
+
+        context 'with length' do
+          it do
+            model.full_name = 'あ'
+            model.valid?
+            expect(model.errors[:full_name]).to include('2～20文字で入力してください')
+          end
+
+          it do
+            model.full_name = 'あ' * 21
+            model.valid?
+            expect(model.errors[:full_name]).to include('2～20文字で入力してください')
+          end
+
+          it do
+            model.full_name = 'あ' * 2
+            model.valid?
+            expect(model.errors[:full_name]).not_to include('2～20文字で入力してください')
+          end
+        end
+
+        context 'with presence' do
+          it do
+            model.valid?
+            expect(model.errors[:full_name]).to include('姓名を入力してください')
+          end
+
+          it do
+            model.full_name = ''
+            model.valid?
+            expect(model.errors[:full_name]).to include('姓名を入力してください')
+          end
+
+          it do
+            model.full_name = 'あ'
+            model.valid?
+            expect(model.errors[:full_name]).not_to include('姓名を入力してください')
+          end
+        end
+
+        context 'with select one' do
+          it do
+            model.valid?
+            expect(model.errors[:gender]).to include('いずれかを選択してください')
+          end
+
+          it do
+            model.gender = ''
+            model.valid?
+            expect(model.errors[:gender]).to include('いずれかを選択してください')
+          end
+
+          it do
+            model.gender = 'man'
+            model.valid?
+            expect(model.errors[:gender]).not_to include('いずれかを選択してください')
+          end
+
+          it do
+            model.gender = 'man'
+            model.valid?
+            expect(model.errors[:gender]).to include('正しくない入力が含まれています')
+          end
+
+          it do
+            model.gender = 'male'
+            model.valid?
+            expect(model.errors[:gender]).not_to include('正しくない入力が含まれています')
+          end
+
+          it do
+            model.gender = 'male, female'
+            model.valid?
+            expect(model.errors[:gender]).to include('正しくない入力が含まれています')
+          end
         end
       end
     end

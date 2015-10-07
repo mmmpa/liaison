@@ -1,7 +1,5 @@
 require 'rspec'
 require './spec/helper'
-require 'yaml'
-require 'pp'
 
 describe Analyst do
   context 'when add valid hash' do

@@ -61,10 +61,9 @@ class Analyst
         }
       end
 
-      if validators['confirmation']
-        confirmation = validators.delete('confirmation')
-        @validators.merge!(confirmation['parameter'] => confirmation['validation'])
-        @parameters.push(confirmation['parameter'])
+      if validators[:confirmation_target]
+        confirmation_target = validators.delete(:confirmation_target)
+        @parameters.push(confirmation_target)
       end
 
       @validators.merge!(key => validators)
@@ -72,28 +71,37 @@ class Analyst
     end
   end
 
+  def message_or_boolean(message)
+    message ? {message: message} : true
+  end
+
   def detect_validator(key, validation)
     validators = {}
     case validation['type'].to_sym
       when :required
-        validators.merge!({presence: true})
+        validators.merge!(presence: message_or_boolean(validation['message']))
       when :confirmation
         confirmation_key = key + '_confirmation'
-        validators.merge!(
-          confirmation: {
-            parameter: confirmation_key,
-            validation: {confirmation: key, allow_blank: true}
-          }
-        )
+        validators.merge!(confirmation: message_or_boolean(validation['message']))
+        validators.merge!(confirmation_target: confirmation_key)
       when :length
-        validators.merge!({length: {
+        validators.merge!(length: {
+                            message: validation['message'],
                             minimum: validation['value']['min'] || 0,
-                            maximum: validation['value']['max'] || 1000
-                          }})
+                            maximum: validation['value']['max'] || 1000,
+                            allow_blank: true
+                          })
       when :select_one
-        validators.merge!({inclusion: validation['value']})
+        validators.merge!(inclusion: {
+                            message: validation['message'],
+                            in: validation['value'],
+                            allow_blank: true
+                          })
       when :select_any
-        validators.merge!({inclusion: validation['value']})
+        validators.merge!(inclusion: {
+                            message: validation['message'],
+                            in: validation['value'],
+                            allow_blank: true})
       else
         nil
     end
@@ -143,5 +151,4 @@ class Analyst
   end
   class RequiredFileNotExist < StandardError
   end
-
 end
