@@ -6,12 +6,26 @@ require 'pp'
 describe Analyst do
   context 'when add valid hash' do
     it do
-      expect(Analyst.new(valid_hash).analyse).to be_truthy
+      expect(Analyst.new('spec/fixtures', valid_hash).analyse).to be_truthy
     end
 
     context 'when required file not exist' do
       it do
-        expect { Analyst.new(invalid_file_hash).analyse }.to raise_error(Analyst::RequiredFileNotExist)
+        expect { Analyst.new('spec/fixtures', invalid_file_hash).analyse }.to raise_error(Analyst::RequiredFileNotExist)
+      end
+    end
+
+    context 'when get result' do
+      context 'before analysing' do
+        it do
+          expect { Analyst.new('spec/fixtures', valid_hash).result }.to raise_error(Analyst::NotYetAnalysed)
+        end
+      end
+
+      context 'after analysing' do
+        it do
+          expect(Analyst.new('spec/fixtures', valid_hash).analyse.result).to eq(valid_hash)
+        end
       end
     end
   end
@@ -19,9 +33,16 @@ describe Analyst do
 
   context 'when pass invalid hash' do
     it do
-      expect { Analyst.new(invalid_hash).analyse }.to raise_error(Analyst::NotHasRequired)
+      expect { Analyst.new('spec/fixtures', invalid_hash).analyse }.to raise_error(Analyst::NotHasRequired)
+    end
+
+    context 'when get result before analysing' do
+      it do
+        expect { Analyst.new('spec/fixtures', invalid_hash).result }.to raise_error(Analyst::NotYetAnalysed)
+      end
     end
   end
+
 end
 
 def invalid_hash
@@ -43,11 +64,10 @@ database:
   key: test_form
   directory: db
 template:
-  directory: html
-  form: form.html
-  thank: thank.html
-  reply_mail: mail.html
-  admin_mail: admin.html
+  form: html/form.html
+  thank: html/thank.html
+  reply_mail: html/mail.html
+  admin_mail: html/admin.html
 form:
   input:
     - type: text

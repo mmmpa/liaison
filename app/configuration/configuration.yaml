@@ -3,11 +3,10 @@ database:
   key: test_form
   directory: db
 template:
-  directory: html
-  form: form.html
-  thank: thank.html
-  reply_mail: mail.html
-  admin_mail: admin.html
+  form: html/form.html
+  thank: html/thank.html
+  reply_mail: html/mail.html
+  admin_mail: html/admin.html
 form:
   input:
     - type: text

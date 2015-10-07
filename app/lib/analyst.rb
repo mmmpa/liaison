@@ -1,17 +1,33 @@
+require 'pathname'
+
 class Analyst
-  def initialize(configuration)
+  def initialize(root, configuration)
+    @root = root
     @configuration = configuration
   end
 
   def analyse
     has_required_value?
     file_exist?
+    @result = @configuration
 
-    true
+    self
+  end
+
+  def result
+    @result || (raise NotYetAnalysed)
   end
 
   def file_exist?
-
+    [
+      @configuration['database']['directory'],
+      @configuration['template']['form'],
+      @configuration['template']['thank'],
+      @configuration['template']['reply_mail'],
+      @configuration['template']['admin_mail'],
+    ].each do |name|
+      raise RequiredFileNotExist unless File.exist?(Pathname.new(@root) + name)
+    end
   end
 
   def has_required_value?
@@ -31,11 +47,13 @@ class Analyst
   def required_key_value
     {
       database: [:key, :directory],
-      template: [:directory, :form, :thank, :reply_mail, :admin_mail],
+      template: [:form, :thank, :reply_mail, :admin_mail],
       form: [:input]
     }
   end
 
+  class NotYetAnalysed < StandardError
+  end
   class NotHasRequired < StandardError
   end
   class RequiredFileNotExist < StandardError
