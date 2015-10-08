@@ -1,14 +1,12 @@
 require 'active_record'
+require "#{__dir__}/ar_configuration_injector"
 
 class Inquiry < ActiveRecord::Base
+  include ARConfigurationInjector
+
   class << self
     def ready(configure)
       return if @initialized
-
-      ActiveRecord::Base.establish_connection(
-        adapter: 'sqlite3',
-        database: 'db'
-      )
 
       table_name = configure.database[:table_name]
       table_columns = configure.database[:columns]
@@ -36,14 +34,8 @@ class Inquiry < ActiveRecord::Base
     def inject(configure)
       return if @initialized
 
-      Inquiry.class_eval do
-        configure.parameters.each do |name|
-          if (validator = configure.validators[name]) && validator != {}
-            validates(name, **validator)
-          end
-        end
-        attr_accessor *configure.parameters
-      end
+      inject_validators(configure.validators)
+      inject_attributes(*configure.parameters)
 
       @initialized = true
     end
