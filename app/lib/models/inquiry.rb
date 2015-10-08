@@ -35,7 +35,6 @@ class Inquiry < ActiveRecord::Base
       return if @initialized
 
       inject_validators(configure.validators)
-      inject_attributes(*configure.parameters)
 
       @initialized = true
     end

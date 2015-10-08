@@ -26,6 +26,12 @@ class PostToken < ActiveRecord::Base
     def sweep(from_cookie)
       where(for_cookie: from_cookie).delete_all
     end
+
+    def create!
+      token = new
+      new.save!
+      token
+    end
   end
 
   def initialize

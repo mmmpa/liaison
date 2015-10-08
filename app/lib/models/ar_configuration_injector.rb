@@ -11,8 +11,41 @@ module ARConfigurationInjector
         def inject_validators(configurations)
           class_eval do
             configurations.each_pair do |attribute_name, validators|
+              if (select_any = validators.delete(:select_any))
+                p select_any
+                add_validation_select_any(attribute_name, select_any)
+              end
               validates(attribute_name, **validators) if validators != {}
             end
+          end
+        end
+
+        def add_validation_select_any(attribute_name, select_any)
+          # パラメーターは配列として扱われる
+          class_eval <<-EOS
+            def #{attribute_name}
+              JSON.parse(self[:#{attribute_name}])
+            rescue
+              []
+            end
+
+            def #{attribute_name}=(value)
+              arralized = value.is_a?(Array) ? value : [value]
+              self[:#{attribute_name}] = (JSON.generate(arralized))
+            end
+          EOS
+
+          class_eval do
+            validate ->(this){
+              this.send(attribute_name).each do |value|
+                unless select_any[:in].include?(value)
+                  this.errors.add(attribute_name, select_any[:message] || :invalid)
+                  return false
+                end
+              end
+
+              true
+            }
           end
         end
       end

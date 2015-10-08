@@ -98,10 +98,10 @@ class Analyst
                             allow_blank: true
                           })
       when :select_any
-        validators.merge!(inclusion: {
+        validators.merge!(select_any: {
                             message: validation['message'],
-                            in: validation['value'],
-                            allow_blank: true})
+                            in: validation['value']
+                          })
       else
         nil
     end

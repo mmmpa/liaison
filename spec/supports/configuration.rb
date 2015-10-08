@@ -4,7 +4,7 @@ def valid_params
   {
     full_name: 'full_name',
     gender: 'male',
-    hobby: 'Programming',
+    hobby: ['Programming'],
     mail_address: 'mmmpa.mmmpa@gmail.com',
     password: 'a' * 8,
     password_confirmation: 'a' * 8
@@ -60,8 +60,6 @@ form:
     - type: text
       key: hobby
       validation:
-        - type: required
-          message: 趣味を一つ以上選択してください
         - type: select_any
           value:
             - PC

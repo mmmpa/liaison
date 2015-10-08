@@ -80,6 +80,25 @@ describe Inquiry do
           end
         end
 
+        context 'with select any' do
+          it do
+            model.valid?
+            expect(model.errors[:hobby]).to match_array([])
+          end
+
+          it do
+            model.hobby = %w(PC Programming)
+            model.valid?
+            expect(model.errors[:hobby]).to match_array([])
+          end
+
+          it do
+            model.hobby = %w(PC Reading)
+            model.valid?
+            expect(model.errors[:hobby]).to include('正しくない入力が含まれています')
+          end
+        end
+
         context 'with select one' do
           it do
             model.valid?
