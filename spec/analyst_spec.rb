@@ -36,7 +36,7 @@ describe Analyst do
 
     context 'when get result before analysing' do
       it do
-        expect { Analyst.new('spec/fixtures', invalid_hash).result }.to raise_error(Analyst::NotYetAnalysed)
+        expect { Analyst.new('spec/fixtures', invalid_hash).configuration }.to raise_error(Analyst::NotYetAnalysed)
       end
     end
   end

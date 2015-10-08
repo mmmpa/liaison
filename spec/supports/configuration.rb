@@ -6,8 +6,21 @@ def valid_params
     gender: 'male',
     hobby: ['Programming'],
     mail_address: 'mmmpa.mmmpa@gmail.com',
+    mail_address_confirmation: 'mmmpa.mmmpa@gmail.com',
     password: 'a' * 8,
     password_confirmation: 'a' * 8
+  }
+end
+
+def invalid_params
+  {
+    full_name: 'full_name',
+    gender: 'male',
+    hobby: ['Programming'],
+    mail_address: 'mmmpa.mmmpa@gmail.com',
+    mail_address_confirmation: 'mmmpa@gmail.com',
+    password: 'a' * 8,
+    password_confirmation: 'a' * 10
   }
 end
 
@@ -27,7 +40,7 @@ def valid_hash
   YAML.load <<-EOS
 database:
   name: テストフォーム
-  key: aaaa
+  key: aaaaaa
   directory: db
 template:
   form: html/form.html
@@ -48,23 +61,23 @@ form:
           message: 2～20文字で入力してください
     - type: text
       key: gender
+      item:
+        - female
+        - male
+        - other
       validation:
         - type: required
           message: いずれかを選択してください
         - type: select_one
-          value:
-            - female
-            - male
-            - other
           message: 正しくない入力が含まれています
     - type: text
       key: hobby
+      item:
+        - PC
+        - Programming
+        - Game
       validation:
         - type: select_any
-          value:
-            - PC
-            - Programming
-            - Game
           message: 正しくない入力が含まれています
     - type: text
       key: mail_address

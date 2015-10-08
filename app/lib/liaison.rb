@@ -1,6 +1,11 @@
 Dir[Pathname.new("#{__dir__}") + './**/*.rb'].each { |f| require f }
 
 class Liaison
+  NO_INPUT = :no_input
+  NOT_VALIDATED = :not_validated
+  VALIDATED = :validated
+  VERIFIED = :verified
+
   attr_accessor :state
 
   class << self
@@ -9,80 +14,146 @@ class Liaison
     end
   end
 
-  def initialize(configuration, input)
-    @configuration = configuration
+  def initialize(configuration, src_root, input)
+    @configuration = Analyst.new(src_root, configuration).analyse.configuration
     @method = input[:method]
-    @parameters = pick_required(input[:parameters])
+    @tokens = {
+      from_cookie: input.delete(:cookie_token),
+      from_html: (input[:parameters] || {}).delete(:token)
+    }
+    @parameters = pick_required(input[:parameters] || {})
+
+    Inquiry.ready(@configuration)
+    Inquiry.inject(@configuration)
+    PostToken.ready
+    FormRenderer.ready(@configuration)
 
     detect_state!
     lead!
   end
 
+  def raw_parameters
+    @raw_input || {}
+  end
+
   def pick_required(params)
-    params.slice(*@configuration.parameters)
+    (@configuration.parameters + @configuration.confirmers).inject({}) do |a, attribute_name|
+      a.update(attribute_name.to_sym => params[attribute_name.to_s] || params[attribute_name.to_sym])
+    end
+  end
+
+  def with_get?
+    @method != :post
+  end
+
+  def with_post?
+    @method == :post
   end
 
   def detect_state!
     #メソッドの検査
-    if @method == :get || @method != :post
-      self.state = :no_input
+    if with_get?
+      no_input!
       return
     end
 
     #入力内容の検査
     @inquiry = Inquiry.new(@parameters)
-    unless @inquiry.valid?
-      self.state = :not_validated
+    if @inquiry.invalid?
+      not_validated!
       return
     end
 
     #トークンの検査
     if valid_token?
-      self.state = :verified
+      verified!
       return
     end
 
-    self.state = :validated
+    validated!
   end
 
   def lead!
     case
       when not_validated?
-        go(:revise)
-      when validate?
-        go(:verify)
+        go(ProcessName::REVISE)
+      when validated?
+        go(ProcessName::VERIFY)
       when verified?
-        go(:complete)
+        go(ProcessName::COMPLETE)
+      when no_input?
+        go(ProcessName::INPUT)
       else
-        go(:input)
+        go(ProcessName::INPUT)
     end
   end
 
-  def go(view)
-    case
-      when :input
+  def go(process_name)
+    case process_name
+      when ProcessName::INPUT
         #入力画面表示
-      when :revise
+        @inquiry = Inquiry.new
+      when ProcessName::REVISE
         #修正画面表示
-      when :verify
-        #hiddenにトークンをセット
+      when ProcessName::VERIFY
+        token = PostToken.create!
+        #HTML用にトークンをセット
+        @inquiry.token = token.for_html
         #クッキーにトークンをセット
-        #確認画面表示
-      when :complete
+        @cookie = feed_cookie(token.for_cookie)
+      #確認画面表示
+      when ProcessName::COMPLETE
+        #メールを送信
         #データベースに登録
-        @inquiry.save!
+        begin
+          @inquiry.save!
+          sweep!
+        rescue
+          go(:revise)
+        end
       #終了画面表示
-      #メールを送信
       else
-        nil
+        # 中断
+        return
     end
+
+    FormRenderer.render(process_name, @inquiry, @cookie)
+  end
+
+  def feed_cookie(token)
+    CGI::Cookie.new({
+                      'name' => :token,
+                      'value' => token
+                    })
+  end
+
+  def sweep!
+    PostToken.sweep(@tokens[:from_cookie])
+    @inquiry = nil
   end
 
   def valid_token?
     #paramに含まれるトークンとクッキーのトークンの組み合わせを調べる
+    PostToken.collate(@tokens[:from_cookie], @tokens[:from_html])
   end
 
-  def blank?
+  def no_input!
+    self.state = NO_INPUT
+  end
+
+  def not_validated!
+    self.state = NOT_VALIDATED
+  end
+
+  def validated!
+    self.state = VALIDATED
+  end
+
+  def verified!
+    self.state = VERIFIED
+  end
+
+  def no_input?
     state == :no_input
   end
 

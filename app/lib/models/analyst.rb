@@ -1,5 +1,3 @@
-require 'pathname'
-
 class Analyst
   def initialize(root, configuration)
     @root = root
@@ -17,7 +15,20 @@ class Analyst
   end
 
   def configuration
-    self || (raise NotYetAnalysed)
+    raise NotYetAnalysed unless @database
+    self
+  end
+
+  def template
+    @template || (raise NotYetAnalysed)
+  end
+
+  def input
+    @input || (raise NotYetAnalysed)
+  end
+
+  def result
+    @result || (raise NotYetAnalysed)
   end
 
   def database
@@ -30,6 +41,10 @@ class Analyst
 
   def validators
     @validators || (raise NotYetAnalysed)
+  end
+
+  def confirmers
+    @confirmers || (raise NotYetAnalysed)
   end
 
   private
@@ -47,7 +62,9 @@ class Analyst
 
   def pick_up_parameters!
     @parameters = []
+    @confirmers = []
     @validators = {}
+    @input = {}
 
     @configuration['form']['input'].each do |input|
       key = input['key']
@@ -55,7 +72,7 @@ class Analyst
 
       if (validations = input['validation']).is_a?(Array)
         validations.map { |validation|
-          detect_validator(key, validation)
+          detect_validator(input, key, validation)
         }.each { |validator|
           validators.merge!(validator)
         }
@@ -63,7 +80,8 @@ class Analyst
 
       if validators[:confirmation_target]
         confirmation_target = validators.delete(:confirmation_target)
-        @parameters.push(confirmation_target)
+        @confirmers.push(confirmation_target)
+        #@validators.merge!(confirmation_target => {presence: true})
       end
 
       @validators.merge!(key => validators)
@@ -75,14 +93,14 @@ class Analyst
     message ? {message: message} : true
   end
 
-  def detect_validator(key, validation)
+  def detect_validator(input, key, validation)
     validators = {}
     case validation['type'].to_sym
       when :required
         validators.merge!(presence: message_or_boolean(validation['message']))
       when :confirmation
         confirmation_key = key + '_confirmation'
-        validators.merge!(confirmation: message_or_boolean(validation['message']))
+        validators.merge!(confirmation: {message: validation['message']})
         validators.merge!(confirmation_target: confirmation_key)
       when :length
         validators.merge!(length: {
@@ -94,13 +112,13 @@ class Analyst
       when :select_one
         validators.merge!(inclusion: {
                             message: validation['message'],
-                            in: validation['value'],
+                            in: input['item'],
                             allow_blank: true
                           })
       when :select_any
         validators.merge!(select_any: {
                             message: validation['message'],
-                            in: validation['value']
+                            in: input['item'],
                           })
       else
         nil
@@ -110,12 +128,16 @@ class Analyst
   end
 
   def file_exist?
+    @template = {}
+
+    %w(form thank reply_mail admin_mail).each do |name|
+      path = Pathname.new(File.expand_path @root) + @configuration['template'][name]
+      raise RequiredFileNotExist unless File.exist?(path)
+      @template.merge!(name.to_sym => path)
+    end
+
     [
       @configuration['database']['directory'],
-      @configuration['template']['form'],
-      @configuration['template']['thank'],
-      @configuration['template']['reply_mail'],
-      @configuration['template']['admin_mail'],
     ].each do |name|
       raise RequiredFileNotExist unless File.exist?(Pathname.new(@root) + name)
     end

@@ -1,7 +1,7 @@
 require 'rspec'
 require './spec/helper'
 
-describe Inquiry do
+describe PostToken do
   before :each do
     PostToken.ready
   end
@@ -35,10 +35,10 @@ describe Inquiry do
     end
 
     context 'with blank' do
-      it { expect{PostToken.collate(nil, saved.for_html)}.to raise_error(PostToken::TokenMissing) }
-      it { expect{PostToken.collate('', saved.for_html)}.to raise_error(PostToken::TokenMissing) }
-      it { expect{PostToken.collate(saved.for_cookie, nil)}.to raise_error(PostToken::TokenMissing) }
-      it { expect{PostToken.collate(saved.for_cookie, '')}.to raise_error(PostToken::TokenMissing) }
+      it { expect(PostToken.collate(nil, saved.for_html)).to be_falsey }
+      it { expect(PostToken.collate('', saved.for_html)).to be_falsey }
+      it { expect(PostToken.collate(saved.for_cookie, nil)).to be_falsey }
+      it { expect(PostToken.collate(saved.for_cookie, '')).to be_falsey }
     end
 
     context 'with invalid token' do

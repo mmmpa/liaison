@@ -6,8 +6,7 @@ class PostToken < ActiveRecord::Base
 
   class << self
     def collate(from_cookie, from_html)
-      raise TokenMissing if is_blank?(from_cookie, from_html)
-
+      return false if is_blank?(from_cookie, from_html)
       where(for_cookie: from_cookie).where(for_html: from_html).size > 0
     end
 
@@ -29,7 +28,7 @@ class PostToken < ActiveRecord::Base
 
     def create!
       token = new
-      new.save!
+      token.save!
       token
     end
   end

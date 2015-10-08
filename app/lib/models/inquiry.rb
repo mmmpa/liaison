@@ -35,6 +35,7 @@ class Inquiry < ActiveRecord::Base
       return if @initialized
 
       inject_validators(configure.validators)
+      inject_attributes(:token)
 
       @initialized = true
     end
