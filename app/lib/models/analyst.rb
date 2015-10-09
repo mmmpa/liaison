@@ -21,7 +21,7 @@ class Analyst
   end
 
   def template
-    @template || (raise NotYetAnalysed)
+    @template_paths || (raise NotYetAnalysed)
   end
 
   def input
@@ -68,7 +68,7 @@ class Analyst
 
   def pick_database_configuration!
     @database = {
-      file_name: @config[:database][:file],
+      file_name: Pathname.new(File.expand_path @root) + @config[:database][:file],
       table_name: @config[:database][:key],
       columns: @config[:form][:input].inject({}) { |hash, input|
         hash.merge!(
@@ -148,12 +148,12 @@ class Analyst
   end
 
   def normalize_template_path!
-    @template = {}
+    @template_paths = {}
 
     %w(form thank reply_mail admin_mail).each do |name|
       path = Pathname.new(File.expand_path @root) + @config[:template][name.to_sym]
       raise RequiredFileNotExist unless File.exist?(path)
-      @template.merge!(name.to_sym => path)
+      @template_paths.merge!(name.to_sym => path)
     end
   end
 

@@ -1,8 +1,5 @@
-Dir[Pathname.new("#{__dir__}") + './**/*.rb'].each { |f| require f }
-
 class Liaison
   attr_accessor :state
-
 
   def initialize(config, src_root, input)
     @config = Analyst.new(src_root, config).analyse.config
@@ -10,7 +7,7 @@ class Liaison
     @tokens = pick_tokens(input)
     @parameters = pick_required(input)
 
-    DatabaseMan.ready(@config.db_file)
+    DatabaseMan.open(@config.db_file)
     Inquiry.ready(@config)
     Inquiry.inject(@config)
     PostToken.ready
@@ -18,6 +15,8 @@ class Liaison
 
     detect_state!
     lead!
+  ensure
+    DatabaseMan.close
   end
 
   def pick_tokens(input)
@@ -88,6 +87,7 @@ class Liaison
           @inquiry.save!
           sweep!
         rescue
+          @inquiry.errors.add(:unknown, '不明なエラーが発生しました')
           go(:revise)
           return
         end

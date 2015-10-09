@@ -6,31 +6,39 @@
 </head>
 <body>
 <form action="" method="post">
-  <%= @model.errors.full_messages %>
+  <% if validated? %>
+  <p>入力内容を確認して送信ボタンをクリックしてください。</p>
+  <% else %>
+  <p>入力後、確認ボタンをクリックしてください。</p>
+  <% end %>
   <%= token %>
   <table>
     <tr>
       <th>姓名</th>
-      <td><%= text 'full_name' %></td>
+      <td><%= text 'full_name' %><%= error 'full_name' %></td>
     </tr>
     <tr>
       <th>性別</th>
-      <td><%= radio 'gender' %></td>
+      <td><%= radio 'gender' %><%= error 'gender' %></td>
     </tr>
     <tr>
       <th>趣味</th>
-      <td><%= checkbox 'hobby' %></td>
+      <td><%= checkbox 'hobby' %><%= error 'hobby' %></td>
     </tr>
     <tr>
       <th>メールアドレス</th>
-      <td><%= text 'mail_address' %></td>
+      <td><%= text 'mail_address' %><%= error 'mail_address' %></td>
     </tr>
     <tr>
       <th>再入力</th>
-      <td><%= text 'mail_address_confirmation' %></td>
+      <td><%= text 'mail_address_confirmation' %><%= error 'mail_address_confirmation' %></td>
     </tr>
   </table>
+  <% if validated? %>
+  <div class="submit"><input type="submit" value="確認"/></div>
+  <% else %>
   <div class="submit"><input type="submit" value="送信"/></div>
+  <% end %>
 </form>
 </body>
 </html>

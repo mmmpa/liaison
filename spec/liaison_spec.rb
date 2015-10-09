@@ -2,6 +2,12 @@ require 'rspec'
 require './spec/helper'
 
 describe Liaison do
+  let(:config) { Analyst.new('spec/fixtures', valid_hash).analyse.config }
+
+  before :each do
+    DatabaseMan.open(config.db_file)
+  end
+
   describe 'state detecting' do
     context 'with get method' do
       context 'with no parameter' do
@@ -96,10 +102,11 @@ describe Liaison do
   describe 'inquiry accepting' do
     context 'when posted valid parameter' do
       it do
-        expect {
-          token = PostToken.create!
-          Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
-        }.to change(Inquiry, :count).by(1)
+        token = PostToken.create!
+        count = Inquiry.count
+        Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
+        DatabaseMan.open(config.db_file)
+        expect(Inquiry.count).to eq(count + 1)
       end
     end
   end

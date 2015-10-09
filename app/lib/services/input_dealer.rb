@@ -1,4 +1,4 @@
-class Coordinator
+class InputDealer
   class << self
     def call(cgi)
       {
