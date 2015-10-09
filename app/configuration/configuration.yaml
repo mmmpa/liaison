@@ -1,6 +1,6 @@
 database:
   name: テストフォーム
-  key: test_form
+  key: aaaaaa
   directory: db
 template:
   form: html/form.html
@@ -13,39 +13,36 @@ form:
       key: full_name
       validation:
         - type: required
+          message: 姓名を入力してください
         - type: length
           value:
-            min: 1
+            min: 2
             max: 20
+          message: 2～20文字で入力してください
     - type: text
       key: gender
+      item:
+        - female
+        - male
+        - other
       validation:
         - type: required
+          message: いずれかを選択してください
         - type: select_one
-          value:
-            - female
-            - male
-            - other
+          message: 正しくない入力が含まれています
     - type: text
       key: hobby
+      item:
+        - PC
+        - Programming
+        - Game
       validation:
-        - type: required
         - type: select_any
-          value:
-            - PC
-            - Programming
-            - Game
+          message: 正しくない入力が含まれています
     - type: text
       key: mail_address
       validation:
         - type: email
-    - type: text
-      key: password
-      validation:
+          message: メールアドレスの書式が正しくありません
         - type: confirmation
-        - type: length
-          value: 8..84
-        - type: only
-          value:
-            - string
-            - number
+          message: メールアドレスが一致しません

@@ -1,5 +1,3 @@
-require 'active_record'
-
 class PostToken < ActiveRecord::Base
   validates :for_cookie, :for_html, presence: true
   validates :for_cookie, uniqueness: {with: :for_html}

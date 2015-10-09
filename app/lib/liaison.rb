@@ -16,12 +16,17 @@ class Liaison
 
   def initialize(configuration, src_root, input)
     @configuration = Analyst.new(src_root, configuration).analyse.configuration
-    @method = input[:method]
+    @method = input[:method].downcase.to_sym
     @tokens = {
       from_cookie: input.delete(:cookie_token),
-      from_html: (input[:parameters] || {}).delete(:token)
+      from_html: (input[:parameters] || {}).delete('token')
     }
     @parameters = pick_required(input[:parameters] || {})
+
+    ActiveRecord::Base.establish_connection(
+      adapter: 'sqlite3',
+      database: 'test_db'
+    )
 
     Inquiry.ready(@configuration)
     Inquiry.inject(@configuration)
@@ -38,7 +43,11 @@ class Liaison
 
   def pick_required(params)
     (@configuration.parameters + @configuration.confirmers).inject({}) do |a, attribute_name|
-      a.update(attribute_name.to_sym => params[attribute_name.to_s] || params[attribute_name.to_sym])
+      value = (params[attribute_name.to_s] || params[attribute_name.to_sym])
+      if value.is_a?(Array) && value.size == 1
+        value = value.first
+      end
+      a.update(attribute_name.to_sym => value)
     end
   end
 
@@ -69,6 +78,7 @@ class Liaison
       verified!
       return
     end
+
 
     validated!
   end
@@ -134,6 +144,8 @@ class Liaison
 
   def valid_token?
     #paramに含まれるトークンとクッキーのトークンの組み合わせを調べる
+    Logger.add([@tokens[:from_cookie], @tokens[:from_html]])
+
     PostToken.collate(@tokens[:from_cookie], @tokens[:from_html])
   end
 

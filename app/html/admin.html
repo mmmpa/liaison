@@ -6,10 +6,8 @@
 </head>
 <body>
 <form action="">
-  <%= token %>
-  <%= radio 'gender' %>
-  <%= checkbox 'hobby' %>
-  <input type="text" name="text" value="<%= @model.full_name %>"/>
+  <input type="hidden" name="token"/>
+  <input type="text" name="text"/>
   <input type="submit"/>
 </form>
 </body>

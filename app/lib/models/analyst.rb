@@ -70,6 +70,8 @@ class Analyst
       key = input['key']
       validators = {}
 
+      @input.merge!(key.to_sym => input['item'])
+
       if (validations = input['validation']).is_a?(Array)
         validations.map { |validation|
           detect_validator(input, key, validation)
