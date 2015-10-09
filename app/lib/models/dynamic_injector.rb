@@ -1,8 +1,8 @@
-module ARConfigurationInjector
+module DynamicInjector
   def self.included(klass)
     klass.class_eval do
       class << klass
-        #プロパティを追加する。基本不要。
+        #プロパティを追加する。
         def inject_attributes(*attribute_names)
           class_eval do
             attr_accessor *attribute_names
@@ -10,9 +10,9 @@ module ARConfigurationInjector
         end
 
         #バリデーションを追加する。
-        def inject_validators(configurations)
+        def inject_validators(configs)
           class_eval do
-            configurations.each_pair do |attribute_name, validators|
+            configs.each_pair do |attribute_name, validators|
               if (select_any = validators.delete(:select_any))
                 add_validation_select_any(attribute_name, select_any)
               end

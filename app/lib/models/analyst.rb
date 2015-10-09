@@ -1,21 +1,22 @@
 class Analyst
-  def initialize(root, configuration)
+  def initialize(root, config)
     @root = root
-    @configuration = configuration.deep_symbolize_keys!
+    @config = config.deep_symbolize_keys!
   end
 
   def analyse
     has_required_value?
-    file_exist?
-    pick_up_database!
-    pick_up_parameters!
-    @result = @configuration
+    normalize_template_path!
+    pick_database_configuration!
+    pick_inquiry_configuration!
+
+    @result = @config
 
     self
   end
 
-  def configuration
-    raise NotYetAnalysed unless @database
+  def config
+    raise NotYetAnalysed unless @result
     self
   end
 
@@ -24,7 +25,7 @@ class Analyst
   end
 
   def input
-    @input || (raise NotYetAnalysed)
+    @inputs || (raise NotYetAnalysed)
   end
 
   def result
@@ -35,25 +36,41 @@ class Analyst
     @database || (raise NotYetAnalysed)
   end
 
-  def parameters
-    @parameters || (raise NotYetAnalysed)
+  def db_file
+    database[:file_name]
+  end
+
+  def db_table
+    database[:table_name]
+  end
+
+  def db_columns
+    database[:columns]
+  end
+
+  def permitted_parameters
+    attributes + additional_attributes
+  end
+
+  def attributes
+    @attributes || (raise NotYetAnalysed)
   end
 
   def validators
     @validators || (raise NotYetAnalysed)
   end
 
-  def confirmers
-    @confirmers || (raise NotYetAnalysed)
+  def additional_attributes
+    @additional_attributes || (raise NotYetAnalysed)
   end
 
   private
 
-  def pick_up_database!
+  def pick_database_configuration!
     @database = {
-      file_name: @configuration[:database][:file],
-      table_name: @configuration[:database][:key],
-      columns: @configuration[:form][:input].inject({}) { |hash, input|
+      file_name: @config[:database][:file],
+      table_name: @config[:database][:key],
+      columns: @config[:form][:input].inject({}) { |hash, input|
         hash.merge!(
           (input[:key] || (raise DBParameterMissing)) => (input[:type] || (raise DBParameterMissing))
         )
@@ -61,17 +78,17 @@ class Analyst
     }
   end
 
-  def pick_up_parameters!
-    @parameters = []
-    @confirmers = []
+  def pick_inquiry_configuration!
+    @attributes = []
+    @additional_attributes = []
     @validators = {}
-    @input = {}
+    @inputs = {}
 
-    @configuration[:form][:input].each do |input|
+    @config[:form][:input].each do |input|
       key = input[:key].to_sym
       validators = {}
 
-      @input.merge!(key => input[:item])
+      @inputs.merge!(key => input[:item])
 
       if (validations = input[:validation]).is_a?(Array)
         validations.map { |validation|
@@ -83,12 +100,11 @@ class Analyst
 
       if validators[:confirmation_target]
         confirmation_target = validators.delete(:confirmation_target).to_sym
-        @confirmers.push(confirmation_target)
-        #@validators.merge!(confirmation_target => {presence: true})
+        @additional_attributes.push(confirmation_target)
       end
 
       @validators.merge!(key => validators)
-      @parameters.push(key)
+      @attributes.push(key)
     end
   end
 
@@ -131,18 +147,18 @@ class Analyst
     validators
   end
 
-  def file_exist?
+  def normalize_template_path!
     @template = {}
 
     %w(form thank reply_mail admin_mail).each do |name|
-      path = Pathname.new(File.expand_path @root) + @configuration[:template][name.to_sym]
+      path = Pathname.new(File.expand_path @root) + @config[:template][name.to_sym]
       raise RequiredFileNotExist unless File.exist?(path)
       @template.merge!(name.to_sym => path)
     end
   end
 
   def has_required_value?
-    trace(@configuration, required_key_value)
+    trace(@config, required_key_value)
   end
 
   def trace(required, req)

@@ -17,7 +17,7 @@ class Coordinator
     end
 
     def adjust_params(cgi)
-      cgi.params.each_pair.inject({}) do |a, (key, value)|
+      (cgi.params || {}).each_pair.inject({}) do |a, (key, value)|
         a.update(key.to_sym => shape(value))
       end
     end

@@ -4,9 +4,9 @@ class FormRenderer
       new(@template, @input, *args).render
     end
 
-    def ready(configuration)
-      @template = configuration.template
-      @input = configuration.input
+    def ready(config)
+      @template = config.template
+      @input = config.input
     end
   end
 

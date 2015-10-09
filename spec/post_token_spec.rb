@@ -2,7 +2,10 @@ require 'rspec'
 require './spec/helper'
 
 describe PostToken do
+  let(:config) { Analyst.new('spec/fixtures', valid_hash).analyse.config }
+
   before :each do
+    DatabaseMan.ready(config.db_file)
     PostToken.ready
   end
 

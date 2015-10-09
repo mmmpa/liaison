@@ -6,7 +6,7 @@ describe Liaison do
     context 'with get method' do
       context 'with no parameter' do
         it do
-          liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :get})
+          liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :get, parameters: {}})
           expect(liaison.no_input?).to be_truthy
         end
       end
@@ -29,7 +29,7 @@ describe Liaison do
     context 'with post method' do
       context 'with no parameter' do
         it do
-          liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post})
+          liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: {}})
           expect(liaison.not_validated?).to be_truthy
         end
       end
@@ -45,7 +45,7 @@ describe Liaison do
         context 'with valid token' do
           it do
             token = PostToken.create!
-            liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!('token' => token.for_html), cookie_token: token.for_cookie})
+            liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
             expect(liaison.verified?).to be_truthy
           end
         end
@@ -53,8 +53,8 @@ describe Liaison do
         context 'with valid token post again' do
           it do
             token = PostToken.create!
-            Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!('token' => token.for_html), cookie_token: token.for_cookie})
-            liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!('token' => token.for_html), cookie_token: token.for_cookie})
+            Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
+            liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
             expect(liaison.verified?).to be_falsey
           end
         end
@@ -62,7 +62,7 @@ describe Liaison do
         context 'with invalid cookie token' do
           it do
             token = PostToken.create!
-            liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!('token' => token.for_html), cookie_token: 'a'})
+            liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: 'a'})
             expect(liaison.verified?).to be_falsey
           end
         end
@@ -70,7 +70,7 @@ describe Liaison do
         context 'with invalid html token' do
           it do
             token = PostToken.create!
-            liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!('token' => 'a'), cookie_token: token.for_cookie})
+            liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!(token: 'a'), cookie_token: token.for_cookie})
             expect(liaison.verified?).to be_falsey
           end
         end
@@ -85,7 +85,7 @@ describe Liaison do
         context 'with valid token' do
           it do
             token = PostToken.create!
-            liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: invalid_params.merge!('token' => token.for_html), cookie_token: token.for_cookie})
+            liaison = Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: invalid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
             expect(liaison.verified?).to be_falsey
           end
         end
@@ -98,7 +98,7 @@ describe Liaison do
       it do
         expect {
           token = PostToken.create!
-          Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!('token' => token.for_html), cookie_token: token.for_cookie})
+          Liaison.new(valid_hash, 'spec/fixtures', {method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
         }.to change(Inquiry, :count).by(1)
       end
     end

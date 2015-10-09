@@ -12,8 +12,8 @@ Logger.work!
 
 def execute
   root_path = Pathname.new(File.expand_path(__dir__))
-  configuration = YAML.load_file(root_path + 'configuration/configuration.yaml')
-  Liaison.new(configuration, root_path + '../spec/fixtures', Coordinator.(CGI.new))
+  config = YAML.load_file(root_path + 'configuration/configuration.yaml')
+  Liaison.new(config, root_path + '../spec/fixtures', Coordinator.(CGI.new))
 rescue => e
   e.backtrace.each(&->(el){p el})
   p e

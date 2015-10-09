@@ -1,15 +1,12 @@
-require 'active_record'
-require "#{__dir__}/ar_configuration_injector"
-
 class Inquiry < ActiveRecord::Base
-  include ARConfigurationInjector
+  include DynamicInjector
 
   class << self
     def ready(configure)
       return if @initialized
 
-      table_name = configure.database[:table_name]
-      table_columns = configure.database[:columns]
+      table_name = configure.db_table
+      table_columns = configure.db_columns
 
       ready_table(table_name)
       ready_column(table_name, table_columns)
@@ -34,7 +31,6 @@ class Inquiry < ActiveRecord::Base
     def inject(configure)
       return if @initialized
 
-      p configure.validators
       inject_validators(configure.validators)
       inject_attributes(:token)
 
