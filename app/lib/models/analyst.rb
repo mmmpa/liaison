@@ -1,7 +1,7 @@
 class Analyst
   def initialize(root, configuration)
     @root = root
-    @configuration = configuration
+    @configuration = configuration.deep_symbolize_keys!
   end
 
   def analyse
@@ -51,10 +51,11 @@ class Analyst
 
   def pick_up_database!
     @database = {
-      table_name: @configuration['database']['key'],
-      columns: @configuration['form']['input'].inject({}) { |hash, input|
+      file_name: @configuration[:database][:file],
+      table_name: @configuration[:database][:key],
+      columns: @configuration[:form][:input].inject({}) { |hash, input|
         hash.merge!(
-          (input['key'] || (raise DBParameterMissing)) => (input['type'] || (raise DBParameterMissing))
+          (input[:key] || (raise DBParameterMissing)) => (input[:type] || (raise DBParameterMissing))
         )
       }
     }
@@ -66,13 +67,13 @@ class Analyst
     @validators = {}
     @input = {}
 
-    @configuration['form']['input'].each do |input|
-      key = input['key']
+    @configuration[:form][:input].each do |input|
+      key = input[:key].to_sym
       validators = {}
 
-      @input.merge!(key.to_sym => input['item'])
+      @input.merge!(key => input[:item])
 
-      if (validations = input['validation']).is_a?(Array)
+      if (validations = input[:validation]).is_a?(Array)
         validations.map { |validation|
           detect_validator(input, key, validation)
         }.each { |validator|
@@ -81,7 +82,7 @@ class Analyst
       end
 
       if validators[:confirmation_target]
-        confirmation_target = validators.delete(:confirmation_target)
+        confirmation_target = validators.delete(:confirmation_target).to_sym
         @confirmers.push(confirmation_target)
         #@validators.merge!(confirmation_target => {presence: true})
       end
@@ -97,30 +98,31 @@ class Analyst
 
   def detect_validator(input, key, validation)
     validators = {}
-    case validation['type'].to_sym
+
+    case validation[:type].to_sym
       when :required
-        validators.merge!(presence: message_or_boolean(validation['message']))
+        validators.merge!(presence: message_or_boolean(validation[:message]))
       when :confirmation
-        confirmation_key = key + '_confirmation'
-        validators.merge!(confirmation: {message: validation['message']})
+        confirmation_key = "#{key }_confirmation"
+        validators.merge!(confirmation: {message: validation[:message]})
         validators.merge!(confirmation_target: confirmation_key)
       when :length
         validators.merge!(length: {
-                            message: validation['message'],
-                            minimum: validation['value']['min'] || 0,
-                            maximum: validation['value']['max'] || 1000,
+                            message: validation[:message],
+                            minimum: validation[:value][:min] || 0,
+                            maximum: validation[:value][:max] || 1000,
                             allow_blank: true
                           })
       when :select_one
         validators.merge!(inclusion: {
-                            message: validation['message'],
-                            in: input['item'],
+                            message: validation[:message],
+                            in: input[:item],
                             allow_blank: true
                           })
       when :select_any
         validators.merge!(select_any: {
-                            message: validation['message'],
-                            in: input['item'],
+                            message: validation[:message],
+                            in: input[:item],
                           })
       else
         nil
@@ -133,15 +135,9 @@ class Analyst
     @template = {}
 
     %w(form thank reply_mail admin_mail).each do |name|
-      path = Pathname.new(File.expand_path @root) + @configuration['template'][name]
+      path = Pathname.new(File.expand_path @root) + @configuration[:template][name.to_sym]
       raise RequiredFileNotExist unless File.exist?(path)
       @template.merge!(name.to_sym => path)
-    end
-
-    [
-      @configuration['database']['directory'],
-    ].each do |name|
-      raise RequiredFileNotExist unless File.exist?(Pathname.new(@root) + name)
     end
   end
 
@@ -151,17 +147,17 @@ class Analyst
 
   def trace(required, req)
     req.each_pair do |key, values|
-      raise NotHasRequired unless required[key.to_s].is_a?(Hash)
+      raise NotHasRequired unless required[key].is_a?(Hash)
 
       values.each do |value|
-        raise NotHasRequired unless required[key.to_s][value.to_s]
+        raise NotHasRequired unless required[key][value]
       end
     end
   end
 
   def required_key_value
     {
-      database: [:key, :directory],
+      database: [:key, :file],
       template: [:form, :thank, :reply_mail, :admin_mail],
       form: [:input]
     }

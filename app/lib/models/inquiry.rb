@@ -34,6 +34,7 @@ class Inquiry < ActiveRecord::Base
     def inject(configure)
       return if @initialized
 
+      p configure.validators
       inject_validators(configure.validators)
       inject_attributes(:token)
 

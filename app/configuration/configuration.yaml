@@ -1,7 +1,7 @@
 database:
   name: テストフォーム
   key: aaaaaa
-  directory: db
+  file: db/db.db
 template:
   form: html/form.html
   thank: html/thank.html

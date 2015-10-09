@@ -5,6 +5,7 @@ describe Inquiry do
   let(:config) { Analyst.new('spec/fixtures', valid_hash).analyse.configuration }
 
   before :each do
+    Liaison.ready(config)
     Inquiry.ready(config)
     Inquiry.inject(config)
   end

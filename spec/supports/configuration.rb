@@ -26,7 +26,7 @@ end
 
 def invalid_hash
   valid = valid_hash
-  valid['database'].delete('directory')
+  valid['database'].delete('file')
   valid
 end
 
@@ -41,7 +41,7 @@ def valid_hash
 database:
   name: テストフォーム
   key: aaaaaa
-  directory: db
+  file: db/db.db
 template:
   form: html/form.html
   thank: html/thank.html
@@ -91,7 +91,9 @@ form:
       validation:
         - type: confirmation
         - type: length
-          value: 8..64
+          value:
+            min: 8
+            max: 64
           message: 8～64文字で入力してください
         - type: only
           value:

@@ -22,7 +22,7 @@ describe Analyst do
 
       context 'after analysing' do
         it do
-          expect(Analyst.new('spec/fixtures', valid_hash).analyse.result).to eq(valid_hash)
+          expect(Analyst.new('spec/fixtures', valid_hash).analyse.result).to eq(valid_hash.deep_symbolize_keys)
         end
       end
     end

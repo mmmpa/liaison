@@ -9,8 +9,11 @@ class Liaison
   attr_accessor :state
 
   class << self
-    def ready(configure)
-
+    def ready(configuration)
+      ActiveRecord::Base.establish_connection(
+        adapter: 'sqlite3',
+        database: configuration.database[:file_name]
+      )
     end
   end
 
@@ -23,11 +26,7 @@ class Liaison
     }
     @parameters = pick_required(input[:parameters] || {})
 
-    ActiveRecord::Base.establish_connection(
-      adapter: 'sqlite3',
-      database: 'test_db'
-    )
-
+    Liaison.ready(@configuration)
     Inquiry.ready(@configuration)
     Inquiry.inject(@configuration)
     PostToken.ready
@@ -43,11 +42,7 @@ class Liaison
 
   def pick_required(params)
     (@configuration.parameters + @configuration.confirmers).inject({}) do |a, attribute_name|
-      value = (params[attribute_name.to_s] || params[attribute_name.to_sym])
-      if value.is_a?(Array) && value.size == 1
-        value = value.first
-      end
-      a.update(attribute_name.to_sym => value)
+      a.update(attribute_name => params[attribute_name])
     end
   end
 
@@ -67,6 +62,7 @@ class Liaison
     end
 
     #入力内容の検査
+    Logger.add(@parameters)
     @inquiry = Inquiry.new(@parameters)
     if @inquiry.invalid?
       not_validated!

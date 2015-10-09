@@ -10,6 +10,7 @@ class InquiryTable < ActiveRecord::Migration
     end
 
     def change(table_name, columns)
+      p :change
       @table_name = table_name
       @columns = columns
       migrate(:change)
