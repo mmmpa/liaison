@@ -42,6 +42,38 @@ describe Inquiry do
           end
         end
 
+        context 'with email' do
+          it do
+            model.mail_address = 'a@@a.com'
+            model.valid?
+            expect(model.errors[:mail_address]).to include('メールアドレスの書式が正しくありません')
+          end
+
+          it do
+            model.mail_address = '@a.com'
+            model.valid?
+            expect(model.errors[:mail_address]).to include('メールアドレスの書式が正しくありません')
+          end
+
+          it do
+            model.mail_address = 'aa.com'
+            model.valid?
+            expect(model.errors[:mail_address]).to include('メールアドレスの書式が正しくありません')
+          end
+
+          it do
+            model.mail_address = 'a@a..com'
+            model.valid?
+            expect(model.errors[:mail_address]).to include('メールアドレスの書式が正しくありません')
+          end
+
+          it do
+            model.mail_address = 'a@a.com'
+            model.valid?
+            expect(model.errors[:mail_address]).not_to include('メールアドレスの書式が正しくありません')
+          end
+        end
+
         context 'with length' do
           it do
             model.full_name = 'あ'

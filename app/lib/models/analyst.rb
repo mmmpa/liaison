@@ -155,6 +155,8 @@ class Analyst
     case validation[:type].to_sym
       when :required
         validators.merge!(presence: message_or_boolean(validation[:message]))
+      when :email
+        validators.merge!(email: message_or_boolean(validation[:message]))
       when :confirmation
         confirmation_key = "#{key }_confirmation"
         validators.merge!(confirmation: {message: validation[:message]})

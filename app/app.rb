@@ -5,6 +5,7 @@ require 'cgi'
 require 'erb'
 require 'active_record'
 require 'active_support'
+require 'email_validator'
 
 Dir["#{__dir__}/lib/**/*.rb"].each do |file|
   require(file) unless file.include?('mailer.rb')
