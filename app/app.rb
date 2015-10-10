@@ -11,7 +11,7 @@ Dir["#{__dir__}/lib/**/*.rb"].each(&method(:require))
 class LiaisonApplication
   class << self
     def execute
-      #Logger.work!
+      Logger.work!
       Liaison.new(config, root_path + '../spec/fixtures', InputDealer.(CGI.new))
     rescue => e
       print "Content-type: text/html\n\n"

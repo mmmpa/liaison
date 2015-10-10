@@ -30,9 +30,9 @@ class FormRenderer
     return '' unless (errors = @model.errors.messages[attribute_name.to_sym])
     css_class = gen_css_class(css_class_name)
     messages = errors.map do |message|
-      %{<li>#{message}</li>}
+      %{<li class="error-text">#{message}</li>}
     end.join
-    %{<ul#{css_class}>#{messages}</ul>}
+    %{<ul class="message-list">#{messages}</ul>}
   end
 
   def for_verify(attribute_name, css_class_name = nil)
@@ -118,9 +118,9 @@ class FormRenderer
 
   def write_html
     case @mode
-      when ProcessName::INPUT, ProcessName::REVISE, ProcessName::VERIFY
+      when UserProcess::INPUT, UserProcess::REVISE, UserProcess::VERIFY
         ERB.new(File.read(@template[:form])).result(binding)
-      when ProcessName::COMPLETE
+      when UserProcess::COMPLETE
         ERB.new(File.read(@template[:thank])).result(binding)
       else
         # 中断

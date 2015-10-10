@@ -3,9 +3,6 @@ class Liaison
 
   def initialize(config, src_root, input)
     @config = Analyst.new(src_root, config).analyse.config
-    @method = input[:method]
-    @tokens = pick_tokens(input)
-    @parameters = pick_required(input)
 
     DatabaseMan.open(@config.db_file)
     Inquiry.ready(@config)
@@ -13,23 +10,18 @@ class Liaison
     PostToken.ready
     FormRenderer.ready(@config)
 
+    execute(input)
+  end
+
+  def execute(input)
+    @method = input[:method]
+    @tokens = pick_tokens(input)
+    @parameters = pick_required(input)
+
     detect_state!
     lead!
   ensure
     DatabaseMan.close
-  end
-
-  def pick_tokens(input)
-    {
-      from_cookie: input[:cookie_token],
-      from_html: input[:parameters][:token]
-    }
-  end
-
-  def pick_required(input)
-    @config.permitted_parameters.inject({}) do |a, attribute_name|
-      a.update(attribute_name => input[:parameters][attribute_name])
-    end
   end
 
   def detect_state!
@@ -58,29 +50,29 @@ class Liaison
   def lead!
     case
       when not_validated?
-        go(ProcessName::REVISE)
+        go(UserProcess::REVISE)
       when validated?
-        go(ProcessName::VERIFY)
+        go(UserProcess::VERIFY)
       when verified?
-        go(ProcessName::COMPLETE)
+        go(UserProcess::COMPLETE)
       when no_input?
-        go(ProcessName::INPUT)
+        go(UserProcess::INPUT)
       else
-        go(ProcessName::INPUT)
+        go(UserProcess::INPUT)
     end
   end
 
   def go(process_name)
     case process_name
-      when ProcessName::INPUT
+      when UserProcess::INPUT
         @inquiry = Inquiry.new
-      when ProcessName::REVISE
-      when ProcessName::VERIFY
+      when UserProcess::REVISE
+      when UserProcess::VERIFY
         token = PostToken.create!
         #トークンのセット
         @inquiry.token = token.for_html
         @cookie = bake_cookie(token.for_cookie)
-      when ProcessName::COMPLETE
+      when UserProcess::COMPLETE
         #メールを送信
         #データベースに登録
         begin
@@ -100,6 +92,19 @@ class Liaison
 
   def bake_cookie(token)
     CGI::Cookie.new({'name' => :token, 'value' => token})
+  end
+
+  def pick_tokens(input)
+    {
+      from_cookie: input[:cookie_token],
+      from_html: input[:parameters][:token]
+    }
+  end
+
+  def pick_required(input)
+    @config.permitted_parameters.inject({}) do |a, attribute_name|
+      a.update(attribute_name => input[:parameters][attribute_name])
+    end
   end
 
   def sweep!
