@@ -33,6 +33,10 @@ module DynamicInjector
             end
 
             def #{attribute_name}=(value)
+              if value.blank?
+                return self[:#{attribute_name}] = nil
+              end
+
               arralized = value.is_a?(Array) ? value : [value]
               self[:#{attribute_name}] = (JSON.generate(arralized))
             end
