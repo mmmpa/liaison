@@ -4,9 +4,9 @@ def valid_params
   {
     full_name: 'full_name',
     gender: 'male',
-    hobby: ['Programming'],
-    mail_address: 'mmmpa.mmmpa@gmail.com',
-    mail_address_confirmation: 'mmmpa.mmmpa@gmail.com',
+    hobby: ['Programming', 'PC'],
+    mail_address: 'mmmpa.mmmpa+customer@gmail.com',
+    mail_address_confirmation: 'mmmpa.mmmpa+customer@gmail.com',
     password: 'a' * 8,
     password_confirmation: 'a' * 8
   }
@@ -38,6 +38,12 @@ end
 
 def valid_hash
   YAML.load <<-EOS
+mail:
+  from: mmmpa.mmmpa@gmail.com
+  admin: mmmpa.mmmpa@gmail.com
+  mail_attribute: mail_address
+  subject: テストフォーム確認メール
+  admin_subject: テストフォーム受信
 database:
   name: テストフォーム
   key: aaaaaa

@@ -12,7 +12,7 @@ class Logger
       @store ||= []
     end
 
-    def log
+    def write
       @enabled ? store.join : ''
     end
   end

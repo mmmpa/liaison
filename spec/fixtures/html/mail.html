@@ -1,14 +1,17 @@
-<!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>Document</title>
-</head>
+<html>
 <body>
-<form action="">
-  <input type="hidden" name="token"/>
-  <input type="text" name="text"/>
-  <input type="submit"/>
-</form>
+以下の内容で問い合わせを承りました。<br>
+<br>
+姓名<br>
+<%= write 'full_name' %><br>
+<br>
+性別<br>
+<%= write 'gender' %><br>
+<br>
+趣味<br>
+<%= write 'hobby' %><br>
+<br>
+メールアドレス<br>
+<%= write 'mail_address' %><br>
 </body>
 </html>

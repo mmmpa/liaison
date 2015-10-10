@@ -5,14 +5,13 @@ require 'cgi'
 require 'erb'
 require 'active_record'
 require 'active_support'
+require 'action_mailer'
 
 Dir["#{__dir__}/lib/**/*.rb"].each(&method(:require))
 
 class LiaisonApplication
   class << self
     def execute
-      #Logger.work!
-
       ready
       Liaison.new(analysed_config).execute(InputDealer.(CGI.new))
     rescue => e

@@ -65,13 +65,11 @@ class Liaison
         @inquiry.token = token.for_html
         @cookie = bake_cookie(token.for_cookie)
       when UserProcess::COMPLETE
-        #メールを送信
         #データベースに登録
         begin
           @inquiry.save!
           sweep!
         rescue
-          @inquiry.errors.add(:unknown, '不明なエラーが発生しました')
           go(:revise)
           return
         end
@@ -80,6 +78,12 @@ class Liaison
     end
 
     FormRenderer.render(process_name, @inquiry, @cookie)
+
+    #画面描画後にメールを送信
+    if process_name == UserProcess::COMPLETE && @config.mail != {}
+      Mailer.send_to_user(@config, @inquiry).deliver_now
+      Mailer.send_to_admin(@config, @inquiry).deliver_now
+    end
   end
 
   def bake_cookie(token)

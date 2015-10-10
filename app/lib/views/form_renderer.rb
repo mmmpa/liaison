@@ -36,9 +36,13 @@ class FormRenderer
     css_class = gen_css_class(css_class_name)
     inputted = @model.send(attribute_name)
     if inputted.is_a?(Array)
-      inputted = inputted.join('、')
+      hidden = inputted.map { |value|
+        %{<input type="hidden" name="#{attribute_name}" value="#{disinfect value}">}
+      }.join
+      %{<div#{css_class}>#{disinfect inputted.join('、')}</div>#{hidden}}
+    else
+      %{<div#{css_class}>#{disinfect inputted}</div><input type="hidden" name="#{attribute_name}" value="#{disinfect inputted}">}
     end
-    %{<div#{css_class}>#{disinfect inputted}</div><input type="hidden" name="#{attribute_name}" value="#{disinfect inputted}">}
   end
 
   def text(attribute_name, css_class_name = nil)
@@ -99,7 +103,7 @@ class FormRenderer
                   'language' => 'ja',
                   'cookie' => [@cookie]
                 }) {
-      write_html + Logger.log
+      write_html + Logger.write
     }
   end
 
@@ -118,7 +122,6 @@ class FormRenderer
   def complete?
     @mode == UserProcess::COMPLETE
   end
-
 
   private
 

@@ -9,6 +9,7 @@ class Analyst
     normalize_template_path!
     pick_database_configuration!
     pick_inquiry_configuration!
+    pick_mail_configuration!
 
     @result = @config
 
@@ -36,6 +37,10 @@ class Analyst
     @database || (raise NotYetAnalysed)
   end
 
+  def mail
+    @mail || (raise NotYetAnalysed)
+  end
+
   def db_file
     database[:file_name]
   end
@@ -46,6 +51,26 @@ class Analyst
 
   def db_columns
     database[:columns]
+  end
+
+  def mail_sender
+    mail[:mail_sender]
+  end
+
+  def mail_subject
+    mail[:mail_subject]
+  end
+
+  def admin_address
+    mail[:admin_address]
+  end
+
+  def admin_mail_subject
+    mail[:admin_mail_subject]
+  end
+
+  def mail_address_attribute
+    mail[:mail_address_attribute]
   end
 
   def permitted_parameters
@@ -65,6 +90,18 @@ class Analyst
   end
 
   private
+
+  def pick_mail_configuration!
+    return {} if @config[:mail].blank?
+
+    @mail = {
+      mail_sender: @config[:mail][:from],
+      mail_subject: @config[:mail][:subject],
+      admin_address: @config[:mail][:admin],
+      admin_mail_subject: @config[:mail][:admin_subject],
+      mail_address_attribute: @config[:mail][:mail_attribute]
+    }
+  end
 
   def pick_database_configuration!
     @database = {
