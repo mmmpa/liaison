@@ -1,16 +1,8 @@
 class Liaison
   attr_accessor :state
 
-  def initialize(config, src_root, input)
-    @config = Analyst.new(src_root, config).analyse.config
-
-    DatabaseMan.open(@config.db_file)
-    Inquiry.ready(@config)
-    Inquiry.inject(@config)
-    PostToken.ready
-    FormRenderer.ready(@config)
-
-    execute(input)
+  def initialize(config)
+    @config = config
   end
 
   def execute(input)
@@ -20,8 +12,8 @@ class Liaison
 
     detect_state!
     lead!
-  ensure
-    DatabaseMan.close
+
+    self
   end
 
   def detect_state!

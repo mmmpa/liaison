@@ -12,18 +12,42 @@ class LiaisonApplication
   class << self
     def execute
       Logger.work!
-      Liaison.new(config, root_path + '../spec/fixtures', InputDealer.(CGI.new))
+
+      ready
+      Liaison.new(analysed_config).execute(InputDealer.(CGI.new))
     rescue => e
       print "Content-type: text/html\n\n"
       print e
+    ensure
+      close
+    end
+
+    def ready
+      DatabaseMan.open(analysed_config.db_file)
+      Inquiry.ready(analysed_config)
+      Inquiry.inject(analysed_config)
+      PostToken.ready
+      FormRenderer.ready(analysed_config)
+    end
+
+    def close
+      DatabaseMan.close
+    end
+
+    def analysed_config
+      @stored_analysed_config ||= Analyst.new(src_root_path, config).analyse.config
     end
 
     def config
-      YAML.load_file(root_path + 'configuration/configuration.yaml')
+      @stored_config ||= YAML.load_file(root_path + 'configuration/configuration.yaml')
     end
 
     def root_path
       Pathname.new(File.expand_path(__dir__))
+    end
+
+    def src_root_path
+      root_path + '../spec/fixtures'
     end
   end
 end

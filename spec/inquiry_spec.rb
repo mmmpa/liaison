@@ -2,12 +2,14 @@ require 'rspec'
 require './spec/helper'
 
 describe Inquiry do
-  let(:config) { Analyst.new('spec/fixtures', valid_hash).analyse.config }
+  let(:analysed_config) { Analyst.new('spec/fixtures', valid_hash).analyse.config }
 
   before :each do
-    DatabaseMan.open(config.db_file)
-    Inquiry.ready(config)
-    Inquiry.inject(config)
+    DatabaseMan.open(analysed_config.db_file)
+    Inquiry.ready(analysed_config)
+    Inquiry.inject(analysed_config)
+    PostToken.ready
+    FormRenderer.ready(analysed_config)
   end
 
   context 'with database' do

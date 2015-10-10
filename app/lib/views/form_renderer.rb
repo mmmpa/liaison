@@ -27,8 +27,9 @@ class FormRenderer
   end
 
   def error(attribute_name, css_class_name = nil)
+    return '' unless revise?
     return '' unless (errors = @model.errors.messages[attribute_name.to_sym])
-    css_class = gen_css_class(css_class_name)
+
     messages = errors.map do |message|
       %{<li class="error-text">#{message}</li>}
     end.join
@@ -105,6 +106,23 @@ class FormRenderer
       write_html + Logger.log
     }
   end
+
+  def input?
+    @mode == UserProcess::INPUT
+  end
+
+  def revise?
+    @mode == UserProcess::REVISE
+  end
+
+  def verify?
+    @mode == UserProcess::VERIFY
+  end
+
+  def complete?
+    @mode == UserProcess::COMPLETE
+  end
+
 
   private
 
