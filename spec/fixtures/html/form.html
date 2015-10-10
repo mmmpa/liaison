@@ -9,7 +9,7 @@
 <article class="w600 block-centering bigger-margin-tb">
   <form action="" method="post">
     <div class="bigger-margin-tb big">
-      <% if validated? %>
+      <% if verify? %>
       <p>入力内容を確認して送信ボタンをクリックしてください。</p>
       <% else %>
       <p>入力後、確認ボタンをクリックしてください。</p>
@@ -39,7 +39,7 @@
       </tr>
     </table>
     <div class="bigger-margin-tb">
-      <% if validated? %>
+      <% if verify? %>
       <ul class="form-button-area">
         <li><input type="submit" class="button green" value="この内容で送信する"></li>
       </ul>

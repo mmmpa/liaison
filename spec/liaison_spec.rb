@@ -6,9 +6,9 @@ describe Liaison do
 
   
   before :each do
+    LiaisonApplication.build_database(analysed_config)
     DatabaseMan.open(analysed_config.db_file)
     Inquiry.ready(analysed_config)
-    Inquiry.inject(analysed_config)
     PostToken.ready
     FormRenderer.ready(analysed_config)
   end

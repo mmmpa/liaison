@@ -18,10 +18,6 @@ class FormRenderer
     @cookie = cookie
   end
 
-  def validated?
-    @stored_validated ||= @model.valid?
-  end
-
   def token
     %{<input type="hidden" name="token" value="#{disinfect @model.token}">} if @model.token
   end
@@ -46,7 +42,7 @@ class FormRenderer
   end
 
   def text(attribute_name, css_class_name = nil)
-    return for_verify(attribute_name, css_class_name) if validated?
+    return for_verify(attribute_name, css_class_name) if verify?
 
     css_class = gen_css_class(css_class_name)
     inputted = @model.send(attribute_name)
@@ -54,7 +50,7 @@ class FormRenderer
   end
 
   def radio(attribute_name, css_class_name = nil)
-    return for_verify(attribute_name, css_class_name) if validated?
+    return for_verify(attribute_name, css_class_name) if verify?
     return '' unless (items = @input[attribute_name.to_sym])
 
     css_class = gen_css_class(css_class_name)
@@ -66,7 +62,7 @@ class FormRenderer
   end
 
   def select(attribute_name, css_class_name = nil)
-    return for_verify(attribute_name, css_class_name) if validated?
+    return for_verify(attribute_name, css_class_name) if verify?
     return '' unless (items = @input[attribute_name.to_sym])
 
     css_class = gen_css_class(css_class_name)
@@ -79,7 +75,7 @@ class FormRenderer
   end
 
   def checkbox(attribute_name, css_class_name = nil)
-    return for_verify(attribute_name, css_class_name) if validated?
+    return for_verify(attribute_name, css_class_name) if verify?
     return '' unless (items = @input[attribute_name.to_sym])
 
     css_class = gen_css_class(css_class_name)

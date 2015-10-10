@@ -11,10 +11,9 @@ Dir["#{__dir__}/lib/**/*.rb"].each(&method(:require))
 class LiaisonApplication
   class << self
     def execute
-      Logger.work!
+      #Logger.work!
 
       ready
-
       Liaison.new(analysed_config).execute(InputDealer.(CGI.new))
     rescue => e
       print "Content-type: text/html\n\n"
@@ -23,10 +22,22 @@ class LiaisonApplication
       close
     end
 
+    def build_database(analysed_config)
+      DatabaseMan.open(analysed_config.db_file)
+      table_name = analysed_config.db_table
+      table_columns = analysed_config.db_columns
+
+      unless ActiveRecord::Base.connection.table_exists?(table_name)
+        InquiryTable.create(table_name)
+      end
+
+      InquiryTable.change(table_name, table_columns) if table_columns != {}
+      DatabaseMan.close
+    end
+
     def ready
       DatabaseMan.open(analysed_config.db_file)
       Inquiry.ready(analysed_config)
-      Inquiry.inject(analysed_config)
       PostToken.ready
       FormRenderer.ready(analysed_config)
     end

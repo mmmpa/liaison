@@ -10,7 +10,6 @@ class InquiryTable < ActiveRecord::Migration
     end
 
     def change(table_name, columns)
-      p :change
       @table_name = table_name
       @columns = columns
       migrate(:change)
@@ -28,8 +27,8 @@ class InquiryTable < ActiveRecord::Migration
       self.class.columns.each_pair do |key, value|
         begin
           add_column(self.class.table_name, key, value)
-        rescue
-          nil
+        rescue => e
+          p e
         end
       end
     end
