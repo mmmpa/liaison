@@ -14,6 +14,7 @@ class LiaisonApplication
       Logger.work!
 
       ready
+
       Liaison.new(analysed_config).execute(InputDealer.(CGI.new))
     rescue => e
       print "Content-type: text/html\n\n"
@@ -47,7 +48,7 @@ class LiaisonApplication
     end
 
     def src_root_path
-      root_path + '../spec/fixtures'
+      root_path
     end
   end
 end

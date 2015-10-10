@@ -2,15 +2,54 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Document</title>
+  <title>Input</title>
+  <link rel="stylesheet" href="/speed_theme/css/def.css"/>
 </head>
 <body>
-<form action="">
-  <%= token %>
-  <%= radio 'gender' %>
-  <%= checkbox 'hobby' %>
-  <input type="text" name="text" value="<%= @model.full_name %>"/>
-  <input type="submit"/>
-</form>
+<article class="w600 block-centering bigger-margin-tb">
+  <form action="" method="post">
+    <div class="bigger-margin-tb big">
+      <% if validated? %>
+      <p>入力内容を確認して送信ボタンをクリックしてください。</p>
+      <% else %>
+      <p>入力後、確認ボタンをクリックしてください。</p>
+      <% end %>
+    </div>
+    <%= token %>
+    <table class="p100 border-gray horizontal-border big-padding">
+      <tr>
+        <th class="text-righting big">姓名</th>
+        <td class="big"><%= text 'full_name', 'p100 big' %><%= error 'full_name' %></td>
+      </tr>
+      <tr>
+        <th class="text-righting big">性別</th>
+        <td class="big"><%= radio 'gender', 'big' %><%= error 'gender' %></td>
+      </tr>
+      <tr>
+        <th class="text-righting big">趣味</th>
+        <td class="big"><%= checkbox 'hobby', 'big' %><%= error 'hobby' %></td>
+      </tr>
+      <tr>
+        <th class="text-righting big">メールアドレス</th>
+        <td class="big"><%= text 'mail_address', 'p100 big' %><%= error 'mail_address' %></td>
+      </tr>
+      <tr>
+        <th class="text-righting big">再入力</th>
+        <td class="big"><%= text 'mail_address_confirmation', 'p100 big' %><%= error 'mail_address_confirmation' %></td>
+      </tr>
+    </table>
+    <div class="bigger-margin-tb">
+      <% if validated? %>
+      <ul class="form-button-area">
+        <li><input type="submit" class="button green" value="この内容で送信する"></li>
+      </ul>
+      <% else %>
+      <ul class="form-button-area">
+        <li><input type="submit" class="button green" value="入力内容を確認する"></li>
+      </ul>
+      <% end %>
+    </div>
+  </form>
+</article>
 </body>
 </html>
