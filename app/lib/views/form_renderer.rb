@@ -105,6 +105,8 @@ class FormRenderer
                 }) {
       write_html + Logger.write
     }
+
+    write_html
   end
 
   def input?
@@ -134,14 +136,15 @@ class FormRenderer
   end
 
   def write_html
-    case @mode
-      when UserProcess::INPUT, UserProcess::REVISE, UserProcess::VERIFY
-        ERB.new(File.read(@template[:form])).result(binding)
-      when UserProcess::COMPLETE
-        ERB.new(File.read(@template[:thank])).result(binding)
-      else
-        # 中断
-        return
-    end
+    @stored_html ||=
+      case @mode
+        when UserProcess::INPUT, UserProcess::REVISE, UserProcess::VERIFY
+          ERB.new(File.read(@template[:form])).result(binding)
+        when UserProcess::COMPLETE
+          ERB.new(File.read(@template[:thank])).result(binding)
+        else
+          # 中断
+          return
+      end
   end
 end

@@ -15,7 +15,7 @@ class LiaisonApplication
   class << self
     def execute
       ready
-      Liaison.new(analysed_config).execute(InputDealer.(CGI.new))
+      Liaison.new(analysed_config).execute(InputDealer.(CGI.new)).try_send_mail
     rescue => e
       print "Content-type: text/html\n\n"
       print e

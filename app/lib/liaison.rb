@@ -60,10 +60,10 @@ class Liaison
         @inquiry = Inquiry.new
       when UserProcess::REVISE
       when UserProcess::VERIFY
-        token = PostToken.create!
+        @token = PostToken.create!
         #トークンのセット
-        @inquiry.token = token.for_html
-        @cookie = bake_cookie(token.for_cookie)
+        @inquiry.token = @token.for_html
+        @cookie = bake_cookie(@token.for_cookie)
       when UserProcess::COMPLETE
         #データベースに登録
         begin
@@ -77,14 +77,27 @@ class Liaison
         return
     end
 
-    FormRenderer.render(process_name, @inquiry, @cookie)
+    @rendered = FormRenderer.render(process_name, @inquiry, @cookie)
+  end
 
-    #画面描画後にメールを送信
-    if process_name == UserProcess::COMPLETE && @config.mail != {}
+  def try_send_mail
+    if @inquiry.persisted? && @config.mail != {}
       require "#{__dir__}/mail/mailer.rb"
       Mailer.send_to_user(@config, @inquiry).deliver_now
       Mailer.send_to_admin(@config, @inquiry).deliver_now
+
+      true
+    else
+      false
     end
+  end
+
+  def rendered
+    @rendered || ''
+  end
+
+  def token
+    @token
   end
 
   def bake_cookie(token)

@@ -4,7 +4,7 @@ require './spec/helper'
 describe Liaison do
   let(:analysed_config) { Analyst.new('spec/fixtures', valid_hash).analyse.config }
 
-  
+
   before :each do
     Inquiry.ready(analysed_config)
     PostToken.ready
@@ -57,6 +57,12 @@ describe Liaison do
             liaison = Liaison.new(analysed_config).execute({method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
             expect(liaison.verified?).to be_truthy
           end
+
+          it do
+            token = PostToken.create!
+            liaison = Liaison.new(analysed_config).execute({method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
+            expect(liaison.try_send_mail).to be_truthy
+          end
         end
 
         context 'with valid token post again' do
@@ -66,6 +72,7 @@ describe Liaison do
             liaison = Liaison.new(analysed_config).execute({method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
             expect(liaison.verified?).to be_falsey
           end
+
         end
 
         context 'with invalid cookie token' do
@@ -73,6 +80,12 @@ describe Liaison do
             token = PostToken.create!
             liaison = Liaison.new(analysed_config).execute({method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: 'a'})
             expect(liaison.verified?).to be_falsey
+          end
+
+          it do
+            token = PostToken.create!
+            liaison = Liaison.new(analysed_config).execute({method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: 'a'})
+            expect(liaison.try_send_mail).to be_falsey
           end
         end
 
@@ -105,7 +118,7 @@ describe Liaison do
   describe 'inquiry accepting' do
     context 'when posted valid parameter' do
       it do
-        expect{
+        expect {
           token = PostToken.create!
           Liaison.new(analysed_config).execute({method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
         }.to change(Inquiry, :count).by(1)

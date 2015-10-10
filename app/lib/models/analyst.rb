@@ -156,7 +156,10 @@ class Analyst
       when :required
         validators.merge!(presence: message_or_boolean(validation[:message]))
       when :email
-        validators.merge!(email: message_or_boolean(validation[:message]))
+        validators.merge!(email: {
+                            message: validation[:message],
+                            allow_blank: true
+                          })
       when :confirmation
         confirmation_key = "#{key }_confirmation"
         validators.merge!(confirmation: {message: validation[:message]})
