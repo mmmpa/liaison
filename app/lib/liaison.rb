@@ -81,6 +81,7 @@ class Liaison
 
     #画面描画後にメールを送信
     if process_name == UserProcess::COMPLETE && @config.mail != {}
+      require "#{__dir__}/mail/mailer.rb"
       Mailer.send_to_user(@config, @inquiry).deliver_now
       Mailer.send_to_admin(@config, @inquiry).deliver_now
     end

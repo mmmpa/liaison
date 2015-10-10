@@ -5,9 +5,10 @@ require 'cgi'
 require 'erb'
 require 'active_record'
 require 'active_support'
-require 'action_mailer'
 
-Dir["#{__dir__}/lib/**/*.rb"].each(&method(:require))
+Dir["#{__dir__}/lib/**/*.rb"].each do |file|
+  require(file) unless file.include?('mailer.rb')
+end
 
 class LiaisonApplication
   class << self

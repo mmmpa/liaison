@@ -13,6 +13,7 @@ template:
   thank: html/thank.html
   reply_mail: html/mail.html
   admin_mail: html/admin.html
+
 form:
   input:
     - type: text

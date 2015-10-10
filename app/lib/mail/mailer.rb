@@ -1,3 +1,5 @@
+require 'action_mailer'
+
 ActionMailer::Base.smtp_settings = {
   user_name: ENV["SENDGRID_USER_NAME"],
   password: ENV["SENDGRID_USER_PASSWORD"],
