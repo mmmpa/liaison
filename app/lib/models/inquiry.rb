@@ -1,6 +1,7 @@
 class Inquiry
   include ActiveModel::Model
   include ActiveModel::Validations
+  include ActiveModel::Validations::Callbacks
   include DynamicInjector
 
   class << self

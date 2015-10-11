@@ -7,7 +7,7 @@ describe Inquiry do
   before :each do
     Inquiry.ready(analysed_config)
     PostToken.ready(analysed_config.token_store)
-    FormRenderer.ready(analysed_config)
+    FormView.ready(analysed_config)
   end
 
   context 'with database' do

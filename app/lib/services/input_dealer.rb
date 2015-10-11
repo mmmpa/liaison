@@ -9,7 +9,9 @@ class InputDealer
     end
 
     def pick_token(cgi)
-      cgi.cookies['token']
+      cgi.cookies['token'].value.first
+    rescue
+      ''
     end
 
     def detect_method(cgi)
@@ -17,9 +19,11 @@ class InputDealer
     end
 
     def adjust_params(cgi)
-      (cgi.params || {}).each_pair.inject({}) do |a, (key, value)|
+      (cgi.params || {}).each_pair.inject({}) { |a, (key, value)|
+        a.update(key.to_s.gsub('[]', '').to_sym => shape(value))
+      }.each_pair.inject({}) { |a, (key, value)|
         a.update(key.to_sym => shape(value))
-      end
+      }
     end
 
     def shape(value)

@@ -65,23 +65,17 @@ class Liaison
         @inquiry.token = @token.for_html
         @cookie = bake_cookie(@token.for_cookie)
       when UserProcess::COMPLETE
-        #データベースに登録
-        begin
-          @inquiry.save!
-          sweep!
-        rescue
-          go(:revise)
-          return
-        end
+        @completed = true
+        sweep!
       else
         return
     end
 
-    @rendered = FormRenderer.render(process_name, @inquiry, @cookie)
+    @rendered = FormView.render(process_name, @inquiry, @cookie)
   end
 
   def try_send_mail
-    if @inquiry.persisted? && @config.mail != {}
+    if @completed && @config.mail != {}
       require "#{__dir__}/mail/mailer.rb"
       Mailer.send_to_user(@config, @inquiry).deliver_now
       Mailer.send_to_admin(@config, @inquiry).deliver_now
@@ -90,6 +84,10 @@ class Liaison
     else
       false
     end
+  end
+
+  def cookie
+    @cookie || nil
   end
 
   def rendered

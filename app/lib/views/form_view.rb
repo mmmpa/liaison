@@ -1,4 +1,4 @@
-class FormRenderer
+class FormView
   class << self
     def render(*args)
       new(@template, @input, *args).render
@@ -32,16 +32,17 @@ class FormRenderer
     %{<ul class="message-list">#{messages}</ul>}
   end
 
-  def for_verify(attribute_name, css_class_name = nil)
+  def for_verify(attribute_name, css_class_name = nil, multiple = false)
     css_class = gen_css_class(css_class_name)
     inputted = @model.send(attribute_name)
+    suffix = multiple ? '[]' : ''
     if inputted.is_a?(Array)
       hidden = inputted.map { |value|
-        %{<input type="hidden" name="#{attribute_name}" value="#{disinfect value}">}
+        %{<input type="hidden" name="#{attribute_name}#{suffix}" value="#{disinfect value}">}
       }.join
       %{<div#{css_class}>#{disinfect inputted.join('、')}</div>#{hidden}}
     else
-      %{<div#{css_class}>#{disinfect inputted}</div><input type="hidden" name="#{attribute_name}" value="#{disinfect inputted}">}
+      %{<div#{css_class}>#{disinfect inputted}</div><input type="hidden" name="#{attribute_name}#{suffix}" value="#{disinfect inputted}">}
     end
   end
 
@@ -79,14 +80,14 @@ class FormRenderer
   end
 
   def checkbox(attribute_name, css_class_name = nil)
-    return for_verify(attribute_name, css_class_name) if verify?
+    return for_verify(attribute_name, css_class_name, true) if verify?
     return '' unless (items = @input[attribute_name.to_sym])
 
     css_class = gen_css_class(css_class_name)
-    selected = @model.send(attribute_name)
+    selected = @model.send(attribute_name) || []
     items.map { |value|
       checked = selected.include?(value) ? ' checked' : ''
-      %{<label><span class="input"><input type="checkbox" name="#{attribute_name}" value="#{value}"#{css_class}#{checked}></span><span class="label">#{value}</span></label>}
+      %{<label><span class="input"><input type="checkbox" name="#{attribute_name}[]" value="#{value}"#{css_class}#{checked}></span><span class="label">#{value}</span></label>}
     }.join
   end
 
@@ -95,17 +96,6 @@ class FormRenderer
   end
 
   def render
-    CGI.new.out({
-                  'status' => detect_status,
-                  'connection' => 'close',
-                  'type' => 'text/html',
-                  'charaset' => 'utf-8',
-                  'language' => 'ja',
-                  'cookie' => [@cookie]
-                }) {
-      write_html + Logger.write
-    }
-
     write_html
   end
 

@@ -16,7 +16,18 @@ class LiaisonApplication
   class << self
     def execute
       ready
-      Liaison.new(analysed_config).execute(InputDealer.(CGI.new)).try_send_mail
+      result = Liaison.new(analysed_config).execute(InputDealer.(CGI.new))
+      CGI.new.out({
+                    'status' => 200,
+                    'connection' => 'close',
+                    'type' => 'text/html',
+                    'charaset' => 'utf-8',
+                    'language' => 'ja',
+                    'cookie' => [result.cookie]
+                  }) {
+        result.rendered + Logger.write
+      }
+      result.try_send_mail
     rescue => e
       print "Content-type: text/html\n\n"
       print e
@@ -24,8 +35,8 @@ class LiaisonApplication
 
     def ready
       Inquiry.ready(analysed_config)
-      PostToken.ready(analysed_config)
-      FormRenderer.ready(analysed_config)
+      PostToken.ready(analysed_config.token_store)
+      FormView.ready(analysed_config)
     end
 
     def analysed_config
