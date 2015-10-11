@@ -44,7 +44,7 @@ module DynamicInjector
 
           class_eval do
             validate ->(this){
-              this.send(attribute_name).each do |value|
+              (this.send(attribute_name) || []).each do |value|
                 unless select_any[:in].include?(value)
                   this.errors.add(attribute_name, select_any[:message] || :invalid)
                   return false

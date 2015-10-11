@@ -100,7 +100,6 @@ PLATFORMS
 DEPENDENCIES
   actionmailer
   activemodel
-  activerecord
   activesupport
   email_validator
   sinatra

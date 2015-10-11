@@ -2,7 +2,6 @@
 source "https://rubygems.org"
 
 # gem "rails"
-gem 'activerecord'
 gem 'actionmailer'
 gem 'activesupport'
 gem 'activemodel'
