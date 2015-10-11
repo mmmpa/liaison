@@ -1,14 +1,15 @@
-class Inquiry < ActiveRecord::Base
+class Inquiry
+  include ActiveModel::Model
+  include ActiveModel::Validations
+  include ActiveModel::Validations::Callbacks
   include DynamicInjector
 
   class << self
     def ready(configure)
       return if @initialized
 
-      self.table_name =  configure.db_table
-
       inject_validators(configure.validators)
-      inject_attributes(:token)
+      inject_attributes(*(configure.attributes + [:token]))
 
       @initialized = true
     end

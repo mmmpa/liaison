@@ -6,8 +6,8 @@ describe Inquiry do
 
   before :each do
     Inquiry.ready(analysed_config)
-    PostToken.ready
-    FormRenderer.ready(analysed_config)
+    PostToken.ready(analysed_config.token_store)
+    FormView.ready(analysed_config)
   end
 
   context 'with database' do
@@ -21,12 +21,6 @@ describe Inquiry do
       context 'when validate' do
         it do
           expect(Inquiry.new.valid?).to be_falsey
-        end
-      end
-
-      context 'when save' do
-        it do
-          expect { Inquiry.new.save! }.to raise_error(ActiveRecord::RecordInvalid)
         end
       end
 
@@ -175,14 +169,6 @@ describe Inquiry do
       context 'when validate' do
         it do
           expect(Inquiry.new(**valid_params).valid?).to be_truthy
-        end
-      end
-
-      context 'when save' do
-        it do
-          expect(Inquiry.new(**valid_params).save!).to be_truthy
-          p Inquiry.last
-
         end
       end
     end

@@ -24,27 +24,17 @@ module DynamicInjector
         private
 
         def add_validation_select_any(attribute_name, select_any)
-          # パラメーターは配列として扱われる
-          class_eval <<-EOS
-            def #{attribute_name}
-              JSON.parse(self[:#{attribute_name}])
-            rescue
-              []
-            end
-
-            def #{attribute_name}=(value)
-              if value.blank?
-                return self[:#{attribute_name}] = nil
-              end
-
-              arralized = value.is_a?(Array) ? value : [value]
-              self[:#{attribute_name}] = (JSON.generate(arralized))
-            end
-          EOS
-
           class_eval do
-            validate ->(this){
-              this.send(attribute_name).each do |value|
+            validate ->(this) {
+              raw_value = this.send(attribute_name)
+              values = if raw_value.blank?
+                            []
+                          elsif !raw_value.is_a?(Array)
+                            [raw_value]
+                          else
+                            raw_value
+                          end
+              values.each do |value|
                 unless select_any[:in].include?(value)
                   this.errors.add(attribute_name, select_any[:message] || :invalid)
                   return false

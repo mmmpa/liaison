@@ -7,8 +7,8 @@ describe Liaison do
 
   before :each do
     Inquiry.ready(analysed_config)
-    PostToken.ready
-    FormRenderer.ready(analysed_config)
+    PostToken.ready(analysed_config.token_store)
+    FormView.ready(analysed_config)
   end
 
   describe 'state detecting' do
@@ -116,13 +116,5 @@ describe Liaison do
   end
 
   describe 'inquiry accepting' do
-    context 'when posted valid parameter' do
-      it do
-        expect {
-          token = PostToken.create!
-          Liaison.new(analysed_config).execute({method: :post, parameters: valid_params.merge!(token: token.for_html), cookie_token: token.for_cookie})
-        }.to change(Inquiry, :count).by(1)
-      end
-    end
   end
 end

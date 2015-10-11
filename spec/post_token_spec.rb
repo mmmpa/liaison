@@ -5,13 +5,12 @@ describe PostToken do
   let(:config) { Analyst.new('spec/fixtures', valid_hash).analyse.config }
 
   before :each do
-    DatabaseMan.open(config.db_file)
-    PostToken.ready
+    PostToken.ready(config.token_store)
   end
 
   describe 'token creation' do
     context 'when new' do
-      let(:token) { PostToken.new }
+      let(:token) { PostToken.new(config.token_store) }
 
       it { expect(token.for_cookie.size).to eq(64) }
       it { expect(token.for_html.size).to eq(64) }
@@ -23,7 +22,6 @@ describe PostToken do
     context 'after saved' do
       let(:saved) do
         PostToken.create!
-        PostToken.last
       end
 
       it { expect(saved.for_cookie.size).to eq(64) }
@@ -34,7 +32,6 @@ describe PostToken do
   describe 'token collating' do
     let(:saved) do
       PostToken.create!
-      PostToken.last
     end
 
     context 'with blank' do
@@ -61,7 +58,6 @@ describe PostToken do
   describe 'token sweeping' do
     let(:saved) do
       PostToken.create!
-      PostToken.last
     end
 
     context 'after swept' do

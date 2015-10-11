@@ -3,7 +3,8 @@ require 'yaml'
 require 'pp'
 require 'cgi'
 require 'erb'
-require 'active_record'
+require 'active_model'
+require 'active_model/validations'
 require 'active_support'
 require 'email_validator'
 
@@ -15,36 +16,27 @@ class LiaisonApplication
   class << self
     def execute
       ready
-      Liaison.new(analysed_config).execute(InputDealer.(CGI.new)).try_send_mail
+      result = Liaison.new(analysed_config).execute(InputDealer.(CGI.new))
+      CGI.new.out({
+                    'status' => 200,
+                    'connection' => 'close',
+                    'type' => 'text/html',
+                    'charaset' => 'utf-8',
+                    'language' => 'ja',
+                    'cookie' => [result.cookie]
+                  }) {
+        result.rendered + Logger.write
+      }
+      result.try_send_mail
     rescue => e
       print "Content-type: text/html\n\n"
       print e
-    ensure
-      close
-    end
-
-    def build_database(analysed_config)
-      DatabaseMan.open(analysed_config.db_file)
-      table_name = analysed_config.db_table
-      table_columns = analysed_config.db_columns
-
-      unless ActiveRecord::Base.connection.table_exists?(table_name)
-        InquiryTable.create(table_name)
-      end
-
-      InquiryTable.change(table_name, table_columns) if table_columns != {}
-      DatabaseMan.close
     end
 
     def ready
-      DatabaseMan.open(analysed_config.db_file)
       Inquiry.ready(analysed_config)
-      PostToken.ready
-      FormRenderer.ready(analysed_config)
-    end
-
-    def close
-      DatabaseMan.close
+      PostToken.ready(analysed_config.token_store)
+      FormView.ready(analysed_config)
     end
 
     def analysed_config

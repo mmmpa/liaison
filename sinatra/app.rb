@@ -5,15 +5,9 @@ Dir[
   Pathname.new("#{__dir__}") + '../app/app.rb',
 ].each(&method(:require))
 
-LiaisonApplication.build_database(LiaisonApplication.analysed_config)
 LiaisonApplication.ready
 
 set :public_folder, Pathname.new("#{__dir__}") + '../sinatra/public'
-
-before do
-  # CGIオフラインモードの回避
-  ARGV.replace(['dummy=dummy'])
-end
 
 get '/' do
   Liaison.new(LiaisonApplication.analysed_config).execute({method: :get, parameters: {}}).rendered
