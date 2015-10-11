@@ -7,7 +7,3 @@ Dir[
 
 Logger.work!
 
-analysed_config = Analyst.new('spec/fixtures', valid_hash).analyse.config
-LiaisonApplication.build_database(analysed_config)
-DatabaseMan.open(analysed_config.db_file)
-

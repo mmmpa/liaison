@@ -7,7 +7,7 @@ class Analyst
   def analyse
     has_required_value?
     normalize_template_path!
-    pick_database_configuration!
+    pick_store_configuration!
     pick_inquiry_configuration!
     pick_mail_configuration!
 
@@ -33,24 +33,12 @@ class Analyst
     @result || (raise NotYetAnalysed)
   end
 
-  def database
-    @database || (raise NotYetAnalysed)
-  end
-
   def mail
     @mail || (raise NotYetAnalysed)
   end
 
-  def db_file
-    database[:file_name]
-  end
-
-  def db_table
-    database[:table_name]
-  end
-
-  def db_columns
-    database[:columns]
+  def token_store
+    @token_store || (raise NotYetAnalysed)
   end
 
   def mail_sender
@@ -103,16 +91,8 @@ class Analyst
     }
   end
 
-  def pick_database_configuration!
-    @database = {
-      file_name: Pathname.new(File.expand_path @root) + @config[:database][:file],
-      table_name: @config[:database][:key],
-      columns: @config[:form][:input].inject({}) { |hash, input|
-        hash.merge!(
-          (input[:key] || (raise DBParameterMissing)) => (input[:type] || (raise DBParameterMissing))
-        )
-      }
-    }
+  def pick_store_configuration!
+    @token_store = Pathname.new(File.expand_path @root) + @config[:store][:token]
   end
 
   def pick_inquiry_configuration!
@@ -215,7 +195,7 @@ class Analyst
 
   def required_key_value
     {
-      database: [:key, :file],
+      store: [:token],
       template: [:form, :thank, :reply_mail, :admin_mail],
       form: [:input]
     }

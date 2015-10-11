@@ -26,7 +26,7 @@ end
 
 def invalid_hash
   valid = valid_hash
-  valid['database'].delete('file')
+  valid['store'].delete('token')
   valid
 end
 
@@ -44,10 +44,8 @@ mail:
   mail_attribute: mail_address
   subject: テストフォーム確認メール
   admin_subject: テストフォーム受信
-database:
-  name: テストフォーム
-  key: aaaaaa
-  file: db/db.db
+store:
+  token: token
 template:
   form: html/form.html
   thank: html/thank.html
