@@ -2,17 +2,17 @@
 
 CGIとして動くRubyをつかった簡易メールフォーム。
 
-リッチなライブラリをふんだんに使っているので、とてもおもい。
+Heroku上ではSinatraで稼働する。
 
 # Usage
 
-## ファイル配置
+## CGIとしてのファイル配置
 
 app以下をhttpアクセスで表示出来ない場所に配置。
 
 public以下をrubyをcgiで動かせる場所に配置。
 
-index.rbとready.rbの
+index.rbの
 
 ```ruby
 require(Pathname.new(__dir__) + "../app/app.rb")
@@ -30,12 +30,12 @@ configurtaion.yamlのtemplateで指定したHTMLを編集。
 
 ERBで動く。
 
-## データベース準備
+## トークンディレクトリ用意
 
-設定が終わればready.rbにアクセス。
-
-データベースのテーブルが作成されたのを確認してready.rbは削除。
+configurtaion.yamlのstore tokenに設定したディレクトリを作成しておく。
 
 # メールはどうなるか
 
-configurtaion.yamlのmail項目の内容に従って送信されるほか、databaseにも保持される。
+configurtaion.yamlのmail項目の内容に従って送信される。
+
+環境変数でSendGriアカウントを設定するか、mailer.rbを書き換える。
